@@ -1,0 +1,43 @@
+cabal-version:   3.14
+name:            som
+version:         0.1.0.0
+-- synopsis:
+-- description:
+license:         BSD-3-Clause
+license-file:    LICENSE
+-- author:
+-- maintainer:
+-- copyright:
+category:        Game
+build-type:      Simple
+-- extra-source-files:
+
+common warnings
+    ghc-options: -Wall
+
+common language
+    default-language: GHC2024
+
+common extensions
+    default-extensions: UnicodeSyntax
+
+common dependencies
+    build-depends: base ^>=4.20.0.0
+
+library
+    import:          warnings
+                   , language
+                   , extensions
+                   , dependencies
+    -- exposed-modules:
+    -- other-modules:
+    hs-source-dirs:  src
+
+executable som
+    import:         warnings
+                  , language
+                  , extensions
+                  , dependencies
+    main-is:        Main.hs
+    build-depends:  som
+    hs-source-dirs: app
