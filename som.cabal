@@ -19,17 +19,24 @@ common language
     default-language: GHC2024
 
 common extensions
-    default-extensions: UnicodeSyntax
+    default-extensions: NoImplicitPrelude
+                      , UnicodeSyntax
 
 common dependencies
     build-depends: base ^>=4.20.0.0
+                 , base-unicode-symbols
+                 , extra
+                 , GLFW-b
+                 , unliftio
 
 library
     import:          warnings
                    , language
                    , extensions
                    , dependencies
-    -- exposed-modules:
+    exposed-modules: SOM.Prelude
+                   , SOM.Window
+                   , Graphics.UI.GLFW.Lifted
     -- other-modules:
     hs-source-dirs:  src
 
