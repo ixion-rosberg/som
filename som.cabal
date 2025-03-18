@@ -27,7 +27,9 @@ common dependencies
                  , base-unicode-symbols
                  , extra
                  , GLFW-b
+                 , time
                  , unliftio
+                 , Yampa
 
 library
     import:          warnings
@@ -36,6 +38,8 @@ library
                    , dependencies
     exposed-modules: SOM.Prelude
                    , SOM.Window
+                   , Data.IORef.Lifted
+                   , Data.Time.Clock.Lifted
                    , Graphics.UI.GLFW.Lifted
     -- other-modules:
     hs-source-dirs:  src

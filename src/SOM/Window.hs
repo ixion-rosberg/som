@@ -1,4 +1,4 @@
-module SOM.Window (create, shouldClose, update) where
+module SOM.Window (Window, create, shouldClose, update) where
 
 import SOM.Prelude
 
@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Data.Either.Extra (maybeToEither)
 
 import Graphics.UI.GLFW (OpenGLProfile (..), WindowHint (..))
-import qualified Graphics.UI.GLFW as GLFW (Window)
+import Graphics.UI.GLFW qualified as GLFW (Window)
 import Graphics.UI.GLFW.Lifted
   ( createWindow
   , init

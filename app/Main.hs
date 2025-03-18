@@ -2,25 +2,41 @@ module Main where
 
 import SOM.Prelude
 
-import SOM.Window (shouldClose, update)
-import qualified SOM.Window as Window (create)
+import SOM.Window (Window, shouldClose, update)
+import SOM.Window qualified as Window (create)
 
-import Control.Monad (when)
+import Control.Arrow (arr)
+import Control.Monad.IO.Class (MonadIO)
+
+import Data.IORef (IORef)
+import Data.IORef.Lifted (newIORef, readIORef, writeIORef)
+import Data.Time.Clock (UTCTime, diffUTCTime)
+import Data.Time.Clock.Lifted (getCurrentTime)
+
+import FRP.Yampa (reactimate)
 
 main ∷ IO ()
 main = do
   w ← Window.create "Sword of Moonlight λ" (width, height)
+  t ← newIORef ⤛ getCurrentTime
 
-  loop w
+  reactimate (pure ()) (sense w t) (actuate w) (arr id)
 
-  where
+  where width  = 800
+        height = 600
 
-    loop w = do
-      continue ← not <$> shouldClose w
+sense ∷ MonadIO μ ⇒ Window → IORef UTCTime → Bool → μ (Double, Maybe α)
+sense w r _ = do
 
-      update w
+  update w
 
-      when continue (loop w)
+  t ← getCurrentTime
+  t₀ ← readIORef r
+  writeIORef r t
 
-    width = 800
-    height = 600
+  let δt = realToFrac (diffUTCTime t t₀)
+
+  pure (δt, Nothing)
+
+actuate ∷ MonadIO μ ⇒ Window → Bool → α → μ Bool
+actuate w _ _ = shouldClose w
