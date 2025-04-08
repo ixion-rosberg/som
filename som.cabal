@@ -19,12 +19,18 @@ common language
     default-language: GHC2024
 
 common extensions
-    default-extensions: NoImplicitPrelude
+    default-extensions: Arrows
+                      , DuplicateRecordFields
+                      , NoFieldSelectors
+                      , NoImplicitPrelude
+                      , OverloadedRecordDot
+                      , StrictData
                       , UnicodeSyntax
 
 common dependencies
     build-depends: base ^>=4.20.0.0
                  , base-unicode-symbols
+                 , containers
                  , extra
                  , GLFW-b
                  , time
@@ -37,8 +43,8 @@ library
                    , extensions
                    , dependencies
     exposed-modules: SOM.Prelude
+                   , SOM.Controller
                    , SOM.Window
-                   , Data.IORef.Lifted
                    , Data.Time.Clock.Lifted
                    , Graphics.UI.GLFW.Lifted
     -- other-modules:

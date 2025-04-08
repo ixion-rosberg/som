@@ -2,30 +2,45 @@ module Main where
 
 import SOM.Prelude
 
-import SOM.Window (Window, shouldClose, update)
+import SOM.Controller (Button (..), ButtonName (..), Controller (..), Dpad (..), controller)
+import SOM.Window (Window, shouldClose, update, inputs)
 import SOM.Window qualified as Window (create)
 
 import Control.Arrow (arr)
-import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 
-import Data.IORef (IORef)
-import Data.IORef.Lifted (newIORef, readIORef, writeIORef)
+import Data.Map.Strict (Map, (!?))
 import Data.Time.Clock (UTCTime, diffUTCTime)
 import Data.Time.Clock.Lifted (getCurrentTime)
 
-import FRP.Yampa (reactimate)
+import FRP.Yampa (Event (..), catEvents, maybeToEvent, mergeEvents, reactimate, returnA)
+
+import Graphics.UI.GLFW (Key (..), KeyState (..))
+
+import UnliftIO.IORef (IORef, newIORef, readIORef, writeIORef)
 
 main ∷ IO ()
 main = do
   w ← Window.create "Sword of Moonlight λ" (width, height)
-  t ← newIORef ⤛ getCurrentTime
+  t ← newIORef =≪ getCurrentTime
 
-  reactimate (pure ()) (sense w t) (actuate w) (arr id)
+  reactimate (pure init) (sense w t) (actuate w) sf
 
   where width  = 800
         height = 600
 
-sense ∷ MonadIO μ ⇒ Window → IORef UTCTime → Bool → μ (Double, Maybe α)
+        init = const NoEvent
+        sf = proc i → do
+          c ← controller ⤙ i
+
+          let
+            up = "Up pressed" <$ c.dpad.up.pressed
+            down = "Down pressed" <$ c.dpad.down.pressed
+
+          returnA ⤙ catEvents [ up, down ]
+
+
+sense ∷ MonadIO μ ⇒ Window → IORef UTCTime → Bool → μ (Double, Maybe (ButtonName → Event Bool))
 sense w r _ = do
 
   update w
@@ -36,7 +51,23 @@ sense w r _ = do
 
   let δt = realToFrac (diffUTCTime t t₀)
 
-  pure (δt, Nothing)
+  i ← keyMap <$> (inputs w)
 
-actuate ∷ MonadIO μ ⇒ Window → Bool → α → μ Bool
+  pure (δt, Just i)
+
+actuate ∷ MonadIO μ ⇒ Window → Bool → Event [String] → μ Bool
+actuate w _ (Event x) = liftIO (print x) *> shouldClose w
 actuate w _ _ = shouldClose w
+
+keyMap ∷ Map Key KeyState → ButtonName → Event Bool
+keyMap ks b = maybeToEvent $ find =≪ case b of
+  DpadUp    → Just Key'W
+  DpadDown  → Just Key'S
+  DpadLeft  → Just Key'A
+  DpadRight → Just Key'D
+  _ → Nothing
+
+  where find = (ks !?) ↣ \ case
+          KeyState'Pressed  → Just True
+          KeyState'Released → Just False
+          _                 → Nothing

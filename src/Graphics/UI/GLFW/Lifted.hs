@@ -3,6 +3,7 @@ module Graphics.UI.GLFW.Lifted
   , init
   , makeContextCurrent
   , pollEvents
+  , setKeyCallback
   , swapBuffers
   , terminate
   , windowHint
@@ -13,12 +14,13 @@ import SOM.Prelude
 
 import Control.Monad.IO.Class (MonadIO, liftIO)
 
-import Graphics.UI.GLFW (Monitor, Window, WindowHint)
-import qualified Graphics.UI.GLFW as Unlifted
+import Graphics.UI.GLFW (KeyCallback, Monitor, Window, WindowHint)
+import Graphics.UI.GLFW qualified as Unlifted
   ( createWindow
   , init
   , makeContextCurrent
   , pollEvents
+  , setKeyCallback
   , swapBuffers
   , terminate
   , windowHint
@@ -36,6 +38,9 @@ makeContextCurrent = liftIO ∘ Unlifted.makeContextCurrent
 
 pollEvents ∷ MonadIO μ ⇒ μ ()
 pollEvents = liftIO Unlifted.pollEvents
+
+setKeyCallback ∷ MonadIO μ ⇒ Window → Maybe KeyCallback → μ ()
+setKeyCallback = (liftIO ∘) ∘ Unlifted.setKeyCallback
 
 swapBuffers ∷ MonadIO μ ⇒ Window → μ ()
 swapBuffers = liftIO ∘ Unlifted.swapBuffers
