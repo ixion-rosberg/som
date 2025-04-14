@@ -1,9 +1,8 @@
 module SOM.Prelude
-  ( module P
-  , module U
+  ( module E
   ) where
 
-import Prelude as P hiding
+import Prelude as E hiding
   ( head
   , init
   , last
@@ -13,6 +12,8 @@ import Prelude as P hiding
   , (>>)
   )
 
-import Prelude.Unicode as U hiding ((‼))
+import Prelude.Unicode as E hiding ((‼))
 
-import Control.Monad.Unicode as U hiding ((≫))
+import Control.Monad.Unicode as E hiding ((≫))
+
+import Data.Functor as E (($>))

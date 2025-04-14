@@ -24,6 +24,7 @@ common extensions
                       , NoFieldSelectors
                       , NoImplicitPrelude
                       , OverloadedRecordDot
+                      , PatternSynonyms
                       , StrictData
                       , UnicodeSyntax
 
@@ -32,6 +33,7 @@ common dependencies
                  , base-unicode-symbols
                  , containers
                  , extra
+                 , gl
                  , GLFW-b
                  , time
                  , unliftio
@@ -44,6 +46,7 @@ library
                    , dependencies
     exposed-modules: SOM.Prelude
                    , SOM.Controller
+                   , SOM.Viewport
                    , SOM.Window
                    , Data.Time.Clock.Lifted
                    , Graphics.UI.GLFW.Lifted
