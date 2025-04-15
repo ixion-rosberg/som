@@ -3,10 +3,12 @@ module SOM.Prelude
   ) where
 
 import Prelude as E hiding
-  ( head
+  ( error
+  , head
   , init
   , last
   , return
+  , readFile
   , tail
   , (!!)
   , (>>)

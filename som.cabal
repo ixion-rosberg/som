@@ -20,6 +20,7 @@ common language
 
 common extensions
     default-extensions: Arrows
+                      , BlockArguments
                       , DuplicateRecordFields
                       , NoFieldSelectors
                       , NoImplicitPrelude
@@ -36,6 +37,7 @@ common dependencies
                  , gl
                  , GLFW-b
                  , time
+                 , typelits-printf
                  , unliftio
                  , Yampa
 
@@ -46,10 +48,14 @@ library
                    , dependencies
     exposed-modules: SOM.Prelude
                    , SOM.Controller
+                   , SOM.Renderer.Program
                    , SOM.Viewport
                    , SOM.Window
                    , Data.Time.Clock.Lifted
+                   , Foreign.Extra
+                   , Foreign.Lifted
                    , Graphics.UI.GLFW.Lifted
+                   , System.IO.Lifted
     -- other-modules:
     hs-source-dirs:  src
 
