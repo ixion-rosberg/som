@@ -1,0 +1,49 @@
+cabal-version : 3.14
+name:          som
+version:       0.1.0.0
+author:        イクシオン・ロズベルグ
+category:      Game
+build-type:    Simple
+
+common shared
+    ghc-options:        -Wall
+    default-language:   GHC2024
+    default-extensions: Arrows
+                      , BlockArguments
+                      , DuplicateRecordFields
+                      , NoFieldSelectors
+                      , NoImplicitPrelude
+                      , OverloadedRecordDot
+                      , PatternSynonyms
+                      , StrictData
+                      , UnicodeSyntax
+    build-depends:      base ^>=4.20.0.0
+                      , som-base
+                      , base-unicode-symbols
+                      , containers
+                      , extra
+                      , gl
+                      , GLFW-b
+                      , time
+                      , typelits-printf
+                      , unliftio
+                      , Yampa
+
+library
+    import:          shared
+    exposed-modules: SOM.Controller
+                   , SOM.Renderer.Program
+                   , SOM.Viewport
+                   , SOM.Window
+                   , Data.Time.Clock.Lifted
+                   , Foreign.Extra
+                   , Foreign.Lifted
+                   , Graphics.UI.GLFW.Lifted
+                   , System.IO.Lifted
+    hs-source-dirs:  src
+
+executable som
+    import:         shared
+    main-is:        Main.hs
+    build-depends:  som
+    hs-source-dirs: app

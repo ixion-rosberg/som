@@ -1,0 +1,2 @@
+packages: som-base/som-base.cabal
+        , som/som.cabal

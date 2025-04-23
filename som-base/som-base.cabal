@@ -1,0 +1,14 @@
+cabal-version: 3.14
+name:          som-base
+version:       0.1.0.0
+author:        イクシオン・ロズベルグ
+category:      Game
+build-type:    Simple
+
+library
+    ghc-options:      -Wall
+    exposed-modules:  SOM.Prelude
+    build-depends:    base ^>=4.20.0.0
+                    , base-unicode-symbols
+    hs-source-dirs:   src
+    default-language: GHC2024
