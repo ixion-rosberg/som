@@ -1,0 +1,24 @@
+cabal-version:      3.14
+name:               gltf2msm
+version:            0.1.0.0
+author:             イクシオン・ロズベルグ
+category:           Game
+build-type:         Simple
+
+common shared
+    ghc-options:        -Wall
+    default-language:   GHC2024
+    default-extensions: UnicodeSyntax
+    build-depends:      base ^>=4.20.0.0
+                      , som-base
+
+library
+    import:          shared
+    exposed-modules: MyLib
+    hs-source-dirs:  src
+
+executable gltf2msm
+    import:         shared
+    main-is:        Main.hs
+    build-depends:  gltf2msm
+    hs-source-dirs: app
