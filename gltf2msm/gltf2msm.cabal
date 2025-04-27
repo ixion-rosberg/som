@@ -8,13 +8,22 @@ build-type:         Simple
 common shared
     ghc-options:        -Wall
     default-language:   GHC2024
-    default-extensions: UnicodeSyntax
+    default-extensions: BlockArguments
+                      , NoImplicitPrelude
+                      , OverloadedRecordDot
+                      , UnicodeSyntax
     build-depends:      base ^>=4.20.0.0
                       , som-base
+                      , bytestring
+                      , extra
+                      , gltf-codec
+                      , optparse-applicative
+                      , unliftio
+                      , vector
 
 library
     import:          shared
-    exposed-modules: MyLib
+    exposed-modules: UnliftIO.Exception.Extra
     hs-source-dirs:  src
 
 executable gltf2msm

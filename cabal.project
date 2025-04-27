@@ -1,3 +1,5 @@
 packages: som-base/som-base.cabal
         , som/som.cabal
         , gltf2msm/gltf2msm.cabal
+
+allow-newer: gltf-codec:aeson
