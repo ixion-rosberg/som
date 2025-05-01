@@ -7,6 +7,7 @@ import Prelude as E hiding
   , head
   , init
   , last
+  , lookup
   , return
   , readFile
   , tail

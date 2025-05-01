@@ -11,19 +11,25 @@ common shared
     default-extensions: BlockArguments
                       , NoImplicitPrelude
                       , OverloadedRecordDot
+                      , OverloadedStrings
                       , UnicodeSyntax
     build-depends:      base ^>=4.20.0.0
                       , som-base
+                      , binary
                       , bytestring
                       , extra
                       , gltf-codec
+                      , linear
                       , optparse-applicative
+                      , text
                       , unliftio
+                      , unordered-containers
                       , vector
 
 library
     import:          shared
-    exposed-modules: UnliftIO.Exception.Extra
+    exposed-modules: Data.Binary.Extra
+                   , UnliftIO.Exception.Extra
     hs-source-dirs:  src
 
 executable gltf2msm
