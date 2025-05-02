@@ -18,10 +18,10 @@ newtype IEEE = IEEE { unIEEE ∷ Float }
 
 instance Binary IEEE where
   get = IEEE <$> getFloatle
-  put = putFloatle ∘ unIEEE
+  put = putFloatle ∘ (.unIEEE)
 
 newtype UnsignedShort = UnsignedShort { unUnsignedShort ∷ Word16 }
 
 instance Binary UnsignedShort where
   get = UnsignedShort <$> getWord16le
-  put = putWord16le ∘ unUnsignedShort
+  put = putWord16le ∘ (.unUnsignedShort)

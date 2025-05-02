@@ -9,6 +9,8 @@ common shared
     ghc-options:        -Wall
     default-language:   GHC2024
     default-extensions: BlockArguments
+                      , DuplicateRecordFields
+                      , NoFieldSelectors
                       , NoImplicitPrelude
                       , OverloadedRecordDot
                       , OverloadedStrings
@@ -21,6 +23,7 @@ common shared
                       , filepath
                       , gltf-codec
                       , linear
+                      , mtl
                       , optparse-applicative
                       , text
                       , unliftio
@@ -29,7 +32,9 @@ common shared
 
 library
     import:          shared
-    exposed-modules: Data.Binary.Extra
+    exposed-modules: SOM.GlTF
+                   , Control.Monad.Except.Extra
+                   , Data.Binary.Extra
                    , UnliftIO.Exception.Extra
     hs-source-dirs:  src
 
