@@ -2,6 +2,8 @@ module Main where
 
 import SOM.Prelude
 
+import SOM.Binary.Piece (Model (..), Vertex (..))
+
 import Codec.GlTF (GlTF (..), fromFile)
 import Codec.GlTF.Accessor (Accessor (..), AccessorIx (..))
 import Codec.GlTF.Buffer (Buffer (..), BufferIx (..))
@@ -9,25 +11,52 @@ import Codec.GlTF.BufferView (BufferView (..), BufferViewIx (..))
 import Codec.GlTF.Mesh (Mesh (..), MeshPrimitive (..))
 import Codec.GlTF.URI (loadURI)
 
-import Data.Binary (Binary)
-import Data.Binary.Extra (IEEE, UnsignedShort, decodeMany)
+import Control.Applicative (optional)
+
+import Data.Binary (Binary, encodeFile)
+import Data.Binary.Extra (IEEE (..), UnsignedShort (..), decodeMany)
 import Data.ByteString (ByteString, fromStrict, readFile)
 import Data.ByteString qualified as B (drop, take)
 import Data.Either.Extra (mapLeft)
 import Data.HashMap.Strict (lookup)
+import Data.Maybe qualified as M (fromMaybe)
 import Data.Text (Text, unpack)
 import Data.Vector (Vector, (!?))
 
 import Linear.V2 (V2)
 import Linear.V3 (V3)
 
-import Options.Applicative (Parser, argument, execParser, fullDesc, info, metavar, str)
+import Options.Applicative
+  ( Parser
+  , argument
+  , execParser
+  , fullDesc
+  , info
+  , long
+  , metavar
+  , short
+  , str
+  , strOption
+  )
 
-import UnliftIO.Exception (Handler (..), IOException, StringException (..), catches, fromEither, stringException)
+import System.FilePath (replaceExtension)
+
+import UnliftIO.Exception
+  ( Handler (..)
+  , IOException
+  , StringException (..)
+  , catches
+  , fromEither
+  , stringException
+  )
 import UnliftIO.Exception.Extra (fromMaybe)
 
-parser ∷ Parser FilePath
-parser = argument str (metavar "FILE")
+data Options = Options { input ∷ String, output ∷ Maybe String }
+
+parser ∷ Parser Options
+parser = Options <$> input <*> output
+  where input = argument str (metavar "[INPUT FILE]")
+        output = optional (strOption (metavar "[OUTPUT FILE]" <> short 'o' <> long "output"))
 
 data BufferData = BufferData { buffers ∷ Vector ByteString
                              , bufferViews ∷ Vector BufferView
@@ -36,9 +65,9 @@ data BufferData = BufferData { buffers ∷ Vector ByteString
 
 main ∷ IO ()
 main = (flip catches) handlers do
-      f ← execParser $ info parser fullDesc
+      o ← execParser $ info parser fullDesc
 
-      g ← fromEither ∘ mapLeft stringException =≪ fromFile f
+      g ← fromEither ∘ mapLeft stringException =≪ fromFile o.input
 
       b ← loadBufferData g
 
@@ -47,7 +76,12 @@ main = (flip catches) handlers do
       (ps ∷ [V3 IEEE]) ← accessMeshAttribute b "POSITION" m
       (ns ∷ [V3 IEEE]) ← accessMeshAttribute b "NORMAL" m
       (ts ∷ [V2 IEEE]) ← accessMeshAttribute b "TEXCOORD_0" m
-      (is ∷ [V3 UnsignedShort]) ← accessIndices b m
+      (is ∷ [UnsignedShort]) ← accessIndices b m
+
+      let vs = zipWith3 vertex ps ns ts
+          is' = (.unUnsignedShort) <$> is
+
+      encodeFile (output o) (Model vs is')
 
       pure ()
 
@@ -57,6 +91,10 @@ main = (flip catches) handlers do
                ]
 
     mesh = (!? 0) ∘ (.primitives) ↢ (!? 0) ↢ (.meshes)
+
+    vertex p n t = Vertex ((.unIEEE) <$> p) ((.unIEEE) <$> n) ((.unIEEE) <$> t)
+
+    output o = M.fromMaybe (replaceExtension o.input "msm") o.output
 
 loadBufferData ∷ GlTF → IO BufferData
 loadBufferData g = BufferData <$> buffers <*> bufferViews <*> accessors
@@ -74,7 +112,7 @@ accessMeshAttribute b a m = access b =≪ accessor
   where accessor = fromMaybe ex (lookup a m.attributes)
         ex = stringException ("Missing attribute " <> unpack a)
 
-accessIndices ∷ BufferData → MeshPrimitive → IO [V3 UnsignedShort]
+accessIndices ∷ BufferData → MeshPrimitive → IO [UnsignedShort]
 accessIndices b m = access b =≪ accessor
   where accessor = fromMaybe (stringException "Missing indices") m.indices
 

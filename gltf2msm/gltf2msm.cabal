@@ -18,6 +18,7 @@ common shared
                       , binary
                       , bytestring
                       , extra
+                      , filepath
                       , gltf-codec
                       , linear
                       , optparse-applicative
