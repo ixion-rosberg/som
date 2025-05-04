@@ -42,7 +42,6 @@ main = do
 
           returnA ⤙ catEvents [ up, down ]
 
-
 sense ∷ MonadIO μ ⇒ Window → Viewport → IORef UTCTime → Bool → μ (Double, Maybe (ButtonName → Event Bool))
 sense w v r _ = do
 

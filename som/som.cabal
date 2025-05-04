@@ -15,6 +15,7 @@ common shared
                       , NoImplicitPrelude
                       , OverloadedRecordDot
                       , PatternSynonyms
+                      , RequiredTypeArguments
                       , StrictData
                       , UnicodeSyntax
     build-depends:      base ^>=4.20.0.0
@@ -24,18 +25,23 @@ common shared
                       , extra
                       , gl
                       , GLFW-b
+                      , linear
+                      , mtl
                       , time
                       , typelits-printf
                       , unliftio
-                      , Yampa
+                      , vector
+                      , Yampa ==0.15
 
 library
     import:          shared
     exposed-modules: SOM.Controller
+                   , SOM.Renderer.Model
                    , SOM.Renderer.Program
                    , SOM.Viewport
                    , SOM.Window
                    , Data.Time.Clock.Lifted
+                   , Data.Vector.Storable.Lifted
                    , Foreign.Extra
                    , Foreign.Lifted
                    , Graphics.UI.GLFW.Lifted
