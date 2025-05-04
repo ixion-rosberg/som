@@ -3,6 +3,8 @@ module SOM.Binary.Piece (Model (..), Vertex (..)) where
 import Data.Binary (Binary)
 import Data.Word (Word16)
 
+import Foreign.Storable.Generic (GStorable)
+
 import GHC.Generics (Generic)
 
 import Linear.V2 (V2)
@@ -15,6 +17,7 @@ instance Binary Model
 data Vertex = Vertex Position Normal TexCoord deriving Generic
 
 instance Binary Vertex
+instance GStorable Vertex
 
 type Position = V3 Float
 type Normal = V3 Float
