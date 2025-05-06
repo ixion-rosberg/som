@@ -1,9 +1,10 @@
-module SOM.Renderer.Program (Program, ShaderType (..), Source, create) where
+module SOM.Renderer.Program (Program, ShaderType (..), Source, create, enable, uniformLocation) where
 
 import SOM.Prelude
 
 import Control.Monad (void)
 import Control.Monad.Extra (whenM)
+import Control.Monad.IO.Class (MonadIO)
 
 import Data.List (singleton)
 
@@ -18,6 +19,7 @@ import Graphics.GL
   , pattern GL_FALSE
   , pattern GL_FRAGMENT_SHADER
   , pattern GL_VERTEX_SHADER
+  , GLint
   , GLuint
   , glAttachShader
   , glCompileShader
@@ -28,15 +30,17 @@ import Graphics.GL
   , glGetProgramiv
   , glGetShaderInfoLog
   , glGetShaderiv
+  , glGetUniformLocation
   , glLinkProgram
   , glShaderSource
+  , glUseProgram
   )
 
 import System.IO.Lifted (readFile)
 
 import UnliftIO (MonadUnliftIO)
 import UnliftIO.Exception (throwString)
-import UnliftIO.Foreign (castCCharToChar, free, malloc, mallocArray, newArray, newCStringLen, peekArray)
+import UnliftIO.Foreign (castCCharToChar, free, malloc, mallocArray, newArray, newCStringLen, peekArray, withCString)
 
 newtype Program = Program GLuint
 
@@ -104,3 +108,9 @@ create = createProgram ↢ mapM createShader
       (throwString ∘ e ∘ fmap castCCharToChar) infoLog
 
       where maxLen = 1024
+
+uniformLocation ∷ MonadUnliftIO μ ⇒ Program → String → μ GLint
+uniformLocation (Program p) u = withCString u (glGetUniformLocation p)
+
+enable ∷ MonadIO μ ⇒ Program → μ ()
+enable (Program p) = glUseProgram p

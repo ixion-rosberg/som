@@ -2,51 +2,74 @@ module Main where
 
 import SOM.Prelude
 
-import SOM.Controller (Button (..), ButtonName (..), Controller (..), Dpad (..), controller)
-import SOM.Viewport (Viewport, clear)
+import SOM.Binary.Piece (Model (..))
+import SOM.Controller (ButtonName (..), controller)
+import SOM.Game (Game, game)
+import SOM.Map (Orientation (..), PieceSetup (..))
+import SOM.Map qualified as Map (create)
 import SOM.Viewport qualified as Viewport (create)
 import SOM.Window (Window, shouldClose, update, inputs)
 import SOM.Window qualified as Window (create)
+import SOM.Renderer (Renderer, draw)
+import SOM.Renderer qualified as Renderer (create)
+import SOM.Renderer.Model (load)
+import SOM.Renderer.Program (ShaderType (..))
 
-import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.IO.Class (MonadIO)
 
+import Data.Binary (decodeFile)
 import Data.Map.Strict (Map, (!?))
 import Data.Time.Clock (UTCTime, diffUTCTime)
 import Data.Time.Clock.Lifted (getCurrentTime)
 
-import FRP.Yampa (Event (..), catEvents, maybeToEvent, reactimate, returnA)
+import FRP.Yampa (Event (..), maybeToEvent, reactimate)
 
 import Graphics.UI.GLFW (Key (..), KeyState (..))
 
+import UnliftIO (MonadUnliftIO)
 import UnliftIO.IORef (IORef, newIORef, readIORef, writeIORef)
 
 main ∷ IO ()
 main = do
-  w ← Window.create "Sword of Moonlight λ" (width, height)
+  w ← Window.create "Sword of Moonλight" (width, height)
   v ← Viewport.create width height
+  r ← Renderer.create v [ (Vertex, "som/shaders/shader.vert")
+                        , (Fragment, "som/shaders/shader.frag")
+                        ]
   t ← newIORef =≪ getCurrentTime
 
-  reactimate (pure init) (sense w v t) (actuate w) sf
+  m ← loadMap
+
+  reactimate (pure init) (sense w t) (actuate w r) (controller ⋙ game m)
 
   where width  = 800
         height = 600
-
         init = const NoEvent
 
-        sf = proc i → do
-          c ← controller ⤙ i
+        loadMap = do
+          f ← PieceSetup <$> loadPiece "som/bin/floor.msm"
 
-          let
-            up = "Up pressed" <$ c.dpad.up.pressed
-            down = "Down pressed" <$ c.dpad.down.pressed
+          pure $ Map.create [ f 0 0 South
+                            , f 0 1 South
+                            , f 0 2 South
+                            , f 1 0 South
+                            , f 1 1 South
+                            , f 1 2 South
+                            , f 2 0 South
+                            , f 2 1 South
+                            , f 2 2 South
+                            ]
 
-          returnA ⤙ catEvents [ up, down ]
 
-sense ∷ MonadIO μ ⇒ Window → Viewport → IORef UTCTime → Bool → μ (Double, Maybe (ButtonName → Event Bool))
-sense w v r _ = do
+        loadPiece f = do
+          (Model vs is) ← decodeFile f
+
+          load vs is
+
+sense ∷ MonadIO μ ⇒ Window → IORef UTCTime → Bool → μ (Double, Maybe (ButtonName → Event Bool))
+sense w r _ = do
 
   update w
-  clear v
 
   t ← getCurrentTime
   t₀ ← readIORef r
@@ -58,9 +81,8 @@ sense w v r _ = do
 
   pure (δt, Just i)
 
-actuate ∷ MonadIO μ ⇒ Window → Bool → Event [String] → μ Bool
-actuate w _ (Event x) = liftIO (print x) *> shouldClose w
-actuate w _ _ = shouldClose w
+actuate ∷ MonadUnliftIO μ ⇒ Window → Renderer → Bool → Game → μ Bool
+actuate w r _ g = draw r g *> shouldClose w
 
 keyMap ∷ Map Key KeyState → ButtonName → Event Bool
 keyMap ks b = maybeToEvent $ find =≪ case b of

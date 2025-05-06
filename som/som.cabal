@@ -1,4 +1,4 @@
-cabal-version : 3.14
+cabal-version: 3.14
 name:          som
 version:       0.1.0.0
 author:        イクシオン・ロズベルグ
@@ -11,6 +11,7 @@ common shared
     default-extensions: Arrows
                       , BlockArguments
                       , DuplicateRecordFields
+                      , LexicalNegation
                       , NoFieldSelectors
                       , NoImplicitPrelude
                       , OverloadedRecordDot
@@ -21,6 +22,7 @@ common shared
     build-depends:      base ^>=4.20.0.0
                       , som-base
                       , base-unicode-symbols
+                      , binary
                       , containers
                       , extra
                       , gl
@@ -36,8 +38,12 @@ common shared
 library
     import:          shared
     exposed-modules: SOM.Controller
+                   , SOM.Game
+                   , SOM.Map
+                   , SOM.Renderer
                    , SOM.Renderer.Model
                    , SOM.Renderer.Program
+                   , SOM.Renderer.Uniform
                    , SOM.Viewport
                    , SOM.Window
                    , Data.Time.Clock.Lifted

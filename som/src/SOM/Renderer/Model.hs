@@ -1,29 +1,34 @@
-module SOM.Renderer.Model (load) where
+module SOM.Renderer.Model (Model, draw, load) where
 
 import SOM.Prelude
 
 import SOM.Binary.Piece qualified as Piece (Vertex)
 
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (evalStateT, get, put)
 
 import Data.Vector.Storable (fromList)
 import Data.Vector.Storable.Lifted (unsafeWith)
 
-import Foreign (Storable, castPtr)
+import Foreign (Storable, castPtr, nullPtr)
 import Foreign.Extra (query, sizeOf)
 
 import Graphics.GL
   ( pattern GL_DYNAMIC_STORAGE_BIT
   , pattern GL_FALSE
   , pattern GL_FLOAT
+  , pattern GL_TRIANGLES
+  , pattern GL_UNSIGNED_SHORT
   , GLenum
   , GLfloat
   , GLint
   , GLsizei
   , GLushort
   , GLuint
+  , glBindVertexArray
   , glCreateBuffers
   , glCreateVertexArrays
+  , glDrawElements
   , glEnableVertexArrayAttrib
   , glNamedBufferStorage
   , glVertexArrayAttribBinding
@@ -102,3 +107,7 @@ load vs is = do
       put (i { index = i.index + 1, offset = i.offset + f.size })
 
     count = (fromIntegral ∘ length) is
+
+draw ∷ MonadIO μ ⇒ Model → μ ()
+draw m = glBindVertexArray m.vao
+  *> glDrawElements GL_TRIANGLES m.count GL_UNSIGNED_SHORT nullPtr

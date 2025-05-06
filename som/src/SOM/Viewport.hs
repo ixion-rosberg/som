@@ -1,4 +1,4 @@
-module SOM.Viewport (Viewport, clear, create) where
+module SOM.Viewport (Viewport, clear, create, perspective) where
 
 import SOM.Prelude
 
@@ -16,6 +16,9 @@ import Graphics.GL
   , glViewport
   )
 
+import Linear.Matrix (M44)
+import Linear.Projection qualified as Projection (perspective)
+
 data Viewport = Viewport Int Int
 
 create ∷ MonadIO μ ⇒ Int → Int → μ Viewport
@@ -27,3 +30,10 @@ create w h = init $> Viewport w h
 
 clear ∷ MonadIO μ ⇒ Viewport → μ ()
 clear = const ∘ glClear $ GL_COLOR_BUFFER_BIT .|. GL_DEPTH_BUFFER_BIT
+
+perspective ∷ Viewport → M44 Float
+perspective (Viewport w h) = Projection.perspective fov aspect near far
+  where fov    = 45 × π ÷ 180
+        aspect = fromIntegral w ÷ fromIntegral h
+        near   = 0.1
+        far    = 10
