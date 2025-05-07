@@ -4,8 +4,8 @@ import SOM.Prelude
 
 import SOM.Binary.Piece qualified as Piece (Vertex)
 
+import Control.Monad (foldM_)
 import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.State (evalStateT, get, put)
 
 import Data.Vector.Storable (fromList)
 import Data.Vector.Storable.Lifted (unsafeWith)
@@ -81,7 +81,7 @@ load vs is = do
   glVertexArrayVertexBuffer vao 0 vbo 0 (fromIntegral (sizeOf α))
   glVertexArrayElementBuffer vao ebo
 
-  evalStateT (mapM_ (setAttribute vao) (attributeFormats α)) (VertexAttributeIndex 0 0)
+  foldM_ (setAttribute vao) (VertexAttributeIndex 0 0) (attributeFormats α)
 
   pure $ Model vao count
 
@@ -97,14 +97,13 @@ load vs is = do
         buffer b ptr = glNamedBufferStorage b size (castPtr ptr) GL_DYNAMIC_STORAGE_BIT
         size = (fromIntegral ∘ (length xs ×)) (sizeOf β)
 
-    setAttribute vao f = do
-      i ← get
+    setAttribute vao i f = do
 
       glEnableVertexArrayAttrib vao i.index
       glVertexArrayAttribFormat vao i.index f.count f.aType GL_FALSE i.offset
       glVertexArrayAttribBinding vao i.index 0
 
-      put (i { index = i.index + 1, offset = i.offset + f.size })
+      pure (i { index = i.index + 1, offset = i.offset + f.size })
 
     count = (fromIntegral ∘ length) is
 
