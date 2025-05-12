@@ -1,5 +1,7 @@
 module SOM.Binary.Piece (Model (..), Vertex (..)) where
 
+import SOM.Prelude
+
 import Data.Binary (Binary)
 import Data.Word (Word16)
 
@@ -10,17 +12,16 @@ import GHC.Generics (Generic)
 import Linear.V2 (V2)
 import Linear.V3 (V3)
 
-data Model = Model [Vertex] [Index] deriving Generic
+data Model = Model { vertices ∷ [Vertex]
+                   , indices  ∷ [Word16]
+                   } deriving Generic
 
 instance Binary Model
 
-data Vertex = Vertex Position Normal TexCoord deriving Generic
+data Vertex = Vertex { position ∷ V3 Float
+                     , normal   ∷ V3 Float
+                     , texCoord ∷ V2 Float
+                     } deriving Generic
 
 instance Binary Vertex
 instance GStorable Vertex
-
-type Position = V3 Float
-type Normal = V3 Float
-type TexCoord = V2 Float
-
-type Index = Word16
