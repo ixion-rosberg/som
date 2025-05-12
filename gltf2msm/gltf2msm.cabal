@@ -1,9 +1,9 @@
-cabal-version:      3.14
-name:               gltf2msm
-version:            0.1.0.0
-author:             イクシオン・ロズベルグ
-category:           Game
-build-type:         Simple
+cabal-version: 3.14
+name:          gltf2msm
+version:       0.1.0.0
+author:        イクシオン・ロズベルグ
+category:      Game
+build-type:    Simple
 
 common shared
     ghc-options:        -Wall
