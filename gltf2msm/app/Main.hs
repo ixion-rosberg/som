@@ -4,10 +4,9 @@ import SOM.Prelude
 
 import SOM.Binary.Piece (Model (..), Vertex (..))
 import SOM.GlTF (GlTF (..), Mesh (..), access, loadBufferData, parse)
-import SOM.Options (Options (..), outputOrExtension, parser)
+import SOM.CLI (Options (..), handlers, outputOrExtension, parser)
 
 import Codec.GlTF (fromFile)
-
 
 import Data.Binary (encodeFile)
 import Data.Binary.Extra (IEEE (..), UnsignedShort (..))
@@ -16,10 +15,7 @@ import Data.Either.Extra (mapLeft)
 import Options.Applicative (execParser, fullDesc, info)
 
 import UnliftIO.Exception
-  ( Handler (..)
-  , IOException
-  , StringException (..)
-  , catches
+  ( catches
   , fromEither
   , stringException
   )
@@ -48,8 +44,5 @@ main = (flip catches) handlers do
       pure ()
 
   where
-    handlers = [ Handler (\ (StringException e _) → putStrLn e)
-               , Handler (\ (e ∷ IOException) → print e)
-               ]
     lift = fromEither ∘ mapLeft stringException
     vertex p n t = Vertex ((.unIEEE) <$> p) ((.unIEEE) <$> n) ((.unIEEE) <$> t)

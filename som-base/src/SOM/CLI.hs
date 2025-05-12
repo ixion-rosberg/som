@@ -1,4 +1,4 @@
-module SOM.Options (Options (..), outputOrExtension, parser) where
+module SOM.CLI (Options (..), handlers, outputOrExtension, parser) where
 
 import SOM.Prelude
 
@@ -9,9 +9,6 @@ import Data.Maybe (fromMaybe)
 import Options.Applicative
   ( Parser
   , argument
-  , execParser
-  , fullDesc
-  , info
   , long
   , metavar
   , short
@@ -21,6 +18,12 @@ import Options.Applicative
 
 import System.FilePath (replaceExtension)
 
+import UnliftIO.Exception
+  ( Handler (..)
+  , IOException
+  , StringException (..)
+  )
+
 data Options = Options { input ∷ FilePath
                        , output ∷ Maybe FilePath
                        }
@@ -29,6 +32,11 @@ parser ∷ Parser Options
 parser = Options <$> input <*> output
   where input = argument str (metavar "[INPUT FILE]")
         output = optional (strOption (metavar "[OUTPUT FILE]" <> short 'o' <> long "output"))
+
+handlers ∷ [Handler IO ()]
+handlers = [ Handler (\ (StringException e _) → putStrLn e)
+           , Handler (\ (e ∷ IOException) → print e)
+           ]
 
 outputOrExtension ∷ String → Options → FilePath
 outputOrExtension e o = fromMaybe (replaceExtension o.input e) o.output

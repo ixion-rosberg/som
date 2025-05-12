@@ -10,7 +10,7 @@ library
     exposed-modules:    SOM.Prelude
                       , SOM.Binary.Piece
                       , SOM.Binary.Texture
-                      , SOM.Options
+                      , SOM.CLI
     build-depends:      base ^>=4.20.0.0
                       , base-unicode-symbols
                       , binary
@@ -18,6 +18,7 @@ library
                       , filepath
                       , linear
                       , optparse-applicative
+                      , unliftio
                       , vector
     hs-source-dirs:     src
     default-language:   GHC2024
