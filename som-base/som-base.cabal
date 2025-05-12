@@ -10,13 +10,17 @@ library
     exposed-modules:    SOM.Prelude
                       , SOM.Binary.Piece
                       , SOM.Binary.Texture
+                      , SOM.Options
     build-depends:      base ^>=4.20.0.0
                       , base-unicode-symbols
                       , binary
                       , derive-storable
+                      , filepath
                       , linear
+                      , optparse-applicative
                       , vector
     hs-source-dirs:     src
     default-language:   GHC2024
     default-extensions: NoImplicitPrelude
+                      , OverloadedRecordDot
                       , UnicodeSyntax
