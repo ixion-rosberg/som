@@ -8,10 +8,18 @@ build-type:    Simple
 common shared
     ghc-options:        -Wall
     default-language:   GHC2024
-    default-extensions: NoImplicitPrelude
+    default-extensions: BlockArguments
+                      , NoImplicitPrelude
+                      , OverloadedRecordDot
                       , UnicodeSyntax
     build-depends:      base ^>=4.20.0.0
                       , som-base
+                      , binary
+                      , extra
+                      , JuicyPixels
+                      , optparse-applicative
+                      , unliftio
+                      , vector
 
 library
     import:          shared
