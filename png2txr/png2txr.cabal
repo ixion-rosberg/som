@@ -1,0 +1,25 @@
+cabal-version: 3.14
+name:          png2txr
+version:       0.1.0.0
+author:        イクシオン・ロズベルグ
+category:      Game
+build-type:    Simple
+
+common shared
+    ghc-options:        -Wall
+    default-language:   GHC2024
+    default-extensions: NoImplicitPrelude
+                      , UnicodeSyntax
+    build-depends:      base ^>=4.20.0.0
+                      , som-base
+
+library
+    import:          shared
+    -- exposed-modules:
+    hs-source-dirs:  src
+
+executable png2txr
+    import:         shared
+    main-is:        Main.hs
+    build-depends:  png2txr
+    hs-source-dirs: app
