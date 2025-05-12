@@ -20,9 +20,6 @@ import UnliftIO.Exception
   , stringException
   )
 
-data Options = Options { input ∷ String, output ∷ Maybe String }
-
-
 main ∷ IO ()
 main = (flip catches) handlers do
       o ← execParser $ info parser fullDesc
