@@ -43,9 +43,11 @@ library
                    , SOM.Renderer
                    , SOM.Renderer.Model
                    , SOM.Renderer.Program
+                   , SOM.Renderer.Texture
                    , SOM.Renderer.Uniform
                    , SOM.Viewport
                    , SOM.Window
+                   , Data.Binary.Lifted
                    , Data.Time.Clock.Lifted
                    , Data.Vector.Storable.Lifted
                    , Foreign.Extra
