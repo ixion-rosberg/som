@@ -3,8 +3,8 @@ module SOM.Player (Player (..), player) where
 import SOM.Prelude
 
 import SOM.Controller (Controller)
-import SOM.Physics (Position, displacement, velocity)
-import SOM.Player.Movement (acceleration, movement)
+import SOM.Physics (Position, displacement, forward, up, velocity)
+import SOM.Player.Movement (acceleration, headBobbing, movement)
 
 import Control.Arrow (returnA)
 
@@ -17,21 +17,15 @@ import Linear.V3 (V3 (..))
 data Player = Player { view ∷ M44 Float }
 
 player ∷ Position → SF Controller Player
-player p₀ = proc c → do
-
+player p₀ = movement ^≫ proc m → do
   rec
-
-    let m = movement c
-        a = acceleration v m
-
-    v ← velocity ⤙ a
-
+    v ← velocity ⤙ acceleration v m
 
   p ← (p₀ +) ^≪ displacement ⤙ v
+  h ← headBobbing ⤙ m
 
+  returnA ⤙ Player (view p h)
 
-  returnA ⤙ Player (lookAt p (p + dir) up)
-
-
-  where up = V3 0 1 0
-        dir = V3 0 0 -1
+  where
+    view p h = lookAt (ph + h) (ph + forward) up
+      where ph = p + V3 0 1.8 0

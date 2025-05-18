@@ -1,9 +1,16 @@
-module SOM.Player.Movement (Movement (..), acceleration, movement) where
+module SOM.Player.Movement (Movement (..), acceleration, headBobbing, movement) where
 
 import SOM.Prelude
 
 import SOM.Controller (Button (..), Dpad (..), Controller (..))
-import SOM.Physics
+import SOM.Physics (Acceleration, Velocity)
+
+import Control.Arrow (returnA)
+import Control.Monad (guard)
+
+import Data.Fixed (mod')
+
+import FRP.Yampa (SF, edgeBy, edgeJust, filterE, switch, time)
 
 import Linear.Metric (normalize)
 import Linear.Vector ((*^))
@@ -12,9 +19,9 @@ import Linear.V3 (V3 (..))
 
 data Movement = Standing | Moving Speed Direction
 
-data Speed = Normal | Dash
-
 type Direction = V2 Float
+
+data Speed = Normal | Dash deriving Eq
 
 movement ∷ Controller → Movement
 movement c = case (V2 strafe walk) of
@@ -38,3 +45,44 @@ acceleration current m = 6.0 *^ (desired - current)
         vmax = \ case
           Normal → 1.6
           Dash   → 3.2
+
+headBobbing ∷ SF Movement (V3 Float)
+headBobbing = (\ y → V3 0 y 0) ^≪ switch standing continue
+  where
+
+    continue (m, φ) = switch next continue
+      where next = case m of
+              Standing   → standing
+              Moving s _ → moving s φ
+
+    standing = (0, ) ^≪ edgeJust ≪^ \ case
+      Standing   → Nothing
+      m          → Just (m, 0)
+
+    moving s₀ φ = proc m → do
+      (x, y, ev) ← steps ⤙ ()
+
+      let ev' = detectChange ((m, x) <$ ev)
+
+      returnA ⤙ (y, ev')
+
+      where
+        detectChange = filterE $ fst ⋙ \ case
+          Standing → True
+          Moving s _ → s ≢ s₀
+
+        steps = proc _ → do
+          t ← realToFrac ^≪ time ⤙ ()
+
+          let x = mod' (φ + t ÷ period) 1
+              y = -0.005 × sin (2 × π × x)
+
+          ev ← stepFinished ⤙ x
+
+          returnA ⤙ (x, y, ev)
+
+        stepFinished = edgeBy (\ x y → guard (x > y) $> ()) 0.0
+
+        period = case s₀ of
+          Normal → 0.7
+          Dash   → 0.5

@@ -48,7 +48,7 @@ main = do
   where width  = 800
         height = 600
         init = const NoEvent
-        p₀ = V3 2 1.8 -1
+        p₀ = V3 2 0 -1
 
         loadMap = do
           f ← loadPiece "som/bin/floor.msm" "som/bin/floor.txr"
