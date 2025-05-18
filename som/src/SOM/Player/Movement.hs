@@ -10,7 +10,7 @@ import Control.Monad (guard)
 
 import Data.Fixed (mod')
 
-import FRP.Yampa (SF, edgeBy, edgeJust, filterE, switch, time)
+import FRP.Yampa (SF, edge, edgeBy, edgeJust, gate, lMerge, switch, time)
 
 import Linear.Metric (normalize)
 import Linear.Vector ((*^))
@@ -62,14 +62,20 @@ headBobbing = (\ y → V3 0 y 0) ^≪ switch standing continue
     moving s₀ φ = proc m → do
       (x, y, ev) ← steps ⤙ ()
 
-      let ev' = detectChange ((m, x) <$ ev)
+      let stopped = gate ev (stop m)
 
-      returnA ⤙ (y, ev')
+      changedSpeed ← changeSpeed ⤙ m
+
+      returnA ⤙ (y, (m, x) <$ lMerge stopped changedSpeed)
 
       where
-        detectChange = filterE $ fst ⋙ \ case
+        stop = \ case
           Standing → True
+          _        → False
+
+        changeSpeed = edge ≪^ \ case
           Moving s _ → s ≢ s₀
+          _          → False
 
         steps = proc _ → do
           t ← realToFrac ^≪ time ⤙ ()
@@ -81,7 +87,7 @@ headBobbing = (\ y → V3 0 y 0) ^≪ switch standing continue
 
           returnA ⤙ (x, y, ev)
 
-        stepFinished = edgeBy (\ x y → guard (x > y) $> ()) 0.0
+        stepFinished = edgeBy (\ x₀ x₁ → guard (x₁ < x₀) $> ()) 0.0
 
         period = case s₀ of
           Normal → 0.7
