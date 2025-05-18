@@ -8,6 +8,7 @@ import SOM.Game (Game (..))
 import SOM.Renderer.Model qualified as Model (draw)
 import SOM.Renderer.Program (Program, Source, enable)
 import SOM.Renderer.Program qualified as Program (create)
+import SOM.Renderer.Texture (bind)
 import SOM.Renderer.Uniform (setUniform)
 import SOM.Viewport (Viewport, clear, perspective)
 
@@ -35,6 +36,7 @@ draw r g = do
     drawMap m = mapM_ drawPiece (pieces m)
 
     drawPiece p = do
+      bind p.texture
       setUniform r.program "model" p.transformation
       Model.draw p.model
 

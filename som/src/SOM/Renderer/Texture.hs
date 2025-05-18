@@ -1,4 +1,4 @@
-module SOM.Renderer.Texture (bind, load) where
+module SOM.Renderer.Texture (Texture, bind, load) where
 
 import SOM.Prelude
 
@@ -15,6 +15,7 @@ import Graphics.GL
   ( pattern GL_CLAMP_TO_EDGE
   , pattern GL_LINEAR
   , pattern GL_RGBA
+  , pattern GL_RGBA8
   , pattern GL_TEXTURE_2D
   , pattern GL_TEXTURE_MAG_FILTER
   , pattern GL_TEXTURE_MIN_FILTER
@@ -25,8 +26,9 @@ import Graphics.GL
   , glBindTextureUnit
   , glCreateTextures
   , glGenerateTextureMipmap
-  , glTextureSubImage2D
   , glTextureParameteri
+  , glTextureStorage2D
+  , glTextureSubImage2D
   )
 
 import UnliftIO (MonadUnliftIO)
@@ -44,6 +46,8 @@ load f = do
   glTextureParameteri t GL_TEXTURE_WRAP_T     GL_CLAMP_TO_EDGE
   glTextureParameteri t GL_TEXTURE_MAG_FILTER GL_LINEAR
   glTextureParameteri t GL_TEXTURE_MIN_FILTER GL_LINEAR
+
+  glTextureStorage2D t 1 GL_RGBA8 w h
 
   withArray xs $ glTextureSubImage2D t 0 0 0 w h GL_RGBA GL_UNSIGNED_BYTE ∘ castPtr
 

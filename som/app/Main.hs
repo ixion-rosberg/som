@@ -12,8 +12,9 @@ import SOM.Window (Window, shouldClose, update, inputs)
 import SOM.Window qualified as Window (create)
 import SOM.Renderer (Renderer, draw)
 import SOM.Renderer qualified as Renderer (create)
-import SOM.Renderer.Model (load)
+import SOM.Renderer.Model qualified as Model (load)
 import SOM.Renderer.Program (ShaderType (..))
+import SOM.Renderer.Texture qualified as Texture (load)
 
 import Control.Monad.IO.Class (MonadIO)
 
@@ -47,7 +48,7 @@ main = do
         init = const NoEvent
 
         loadMap = do
-          f ← PieceSetup <$> loadPiece "som/bin/floor.msm"
+          f ← loadPiece "som/bin/floor.msm" "som/bin/floor.txr"
 
           pure $ Map.create [ f 0 0 South
                             , f 0 1 South
@@ -61,10 +62,10 @@ main = do
                             ]
 
 
-        loadPiece f = do
-          (Model vs is) ← decodeFile f
+        loadPiece m t = do
+          (Model vs is) ← decodeFile m
 
-          load vs is
+          PieceSetup <$> Model.load vs is <*> Texture.load t
 
 sense ∷ MonadIO μ ⇒ Window → IORef UTCTime → Bool → μ (Double, Maybe (ButtonName → Event Bool))
 sense w r _ = do

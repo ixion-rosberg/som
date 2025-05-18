@@ -3,6 +3,7 @@ module SOM.Map (Map, Orientation (..), Piece (..), PieceSetup (..), create, piec
 import SOM.Prelude
 
 import SOM.Renderer.Model (Model)
+import SOM.Renderer.Texture (Texture)
 
 import Data.Map.Strict (elems, fromList)
 import Data.Map.Strict qualified as M (Map)
@@ -13,16 +14,16 @@ import Linear.V3 (V3 (..))
 
 data Map = Map (M.Map (ℕ, ℕ) Piece)
 
-data Piece = Piece { model ∷ Model, transformation ∷ M44 Float }
+data Piece = Piece { model ∷ Model, texture ∷ Texture, transformation ∷ M44 Float }
 
-data PieceSetup = PieceSetup { model ∷ Model, x ∷ ℕ, z ∷ ℕ, orientation ∷ Orientation }
+data PieceSetup = PieceSetup { model ∷ Model, texture ∷ Texture, x ∷ ℕ, z ∷ ℕ, orientation ∷ Orientation }
 
 data Orientation = South | East | North | West
 
 create ∷ [PieceSetup] → Map
 create = Map ∘ fromList ∘ fmap piece
   where
-    piece p = ((p.x, p.z), Piece p.model transformation)
+    piece p = ((p.x, p.z), Piece p.model p.texture transformation)
       where
         transformation = mkTransformation orientation position
         orientation = axisAngle (V3 0 1 0) case p.orientation of
