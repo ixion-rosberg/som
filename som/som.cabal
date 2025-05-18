@@ -40,6 +40,9 @@ library
     exposed-modules: SOM.Controller
                    , SOM.Game
                    , SOM.Map
+                   , SOM.Physics
+                   , SOM.Player
+                   , SOM.Player.Movement
                    , SOM.Renderer
                    , SOM.Renderer.Model
                    , SOM.Renderer.Program

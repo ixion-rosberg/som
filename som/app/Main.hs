@@ -27,6 +27,8 @@ import FRP.Yampa (Event (..), maybeToEvent, reactimate)
 
 import Graphics.UI.GLFW (Key (..), KeyState (..))
 
+import Linear.V3 (V3 (..))
+
 import UnliftIO (MonadUnliftIO)
 import UnliftIO.IORef (IORef, newIORef, readIORef, writeIORef)
 
@@ -41,11 +43,12 @@ main = do
 
   m ← loadMap
 
-  reactimate (pure init) (sense w t) (actuate w r) (controller ⋙ game m)
+  reactimate (pure init) (sense w t) (actuate w r) (controller ⋙ game m p₀)
 
   where width  = 800
         height = 600
         init = const NoEvent
+        p₀ = V3 2 1.8 -1
 
         loadMap = do
           f ← loadPiece "som/bin/floor.msm" "som/bin/floor.txr"
@@ -91,6 +94,9 @@ keyMap ks b = maybeToEvent $ find =≪ case b of
   DpadDown  → Just Key'S
   DpadLeft  → Just Key'A
   DpadRight → Just Key'D
+  Circle    → Just Key'Space
+  L1        → Just Key'Left
+  R1        → Just Key'Right
   _ → Nothing
 
   where find = (ks !?) ↣ \ case

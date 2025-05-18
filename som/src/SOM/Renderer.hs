@@ -5,6 +5,7 @@ import SOM.Prelude
 import SOM.Map (Piece (..), pieces)
 
 import SOM.Game (Game (..))
+import SOM.Player (Player (..))
 import SOM.Renderer.Model qualified as Model (draw)
 import SOM.Renderer.Program (Program, Source, enable)
 import SOM.Renderer.Program qualified as Program (create)
@@ -29,7 +30,7 @@ draw ∷ MonadUnliftIO μ ⇒ Renderer → Game → μ ()
 draw r g = do
   clear r.viewport
   enable r.program
-  setUniform r.program "view" view
+  setUniform r.program "view" g.player.view
   setUniform r.program "projection" (perspective r.viewport)
   drawMap g.map
   where
