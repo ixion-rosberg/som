@@ -1,7 +1,5 @@
 module SOM.Game (Game (..), game) where
 
-import SOM.Prelude
-
 import SOM.Controller (Controller)
 import SOM.Map (Map)
 import SOM.Physics (Position)
@@ -18,4 +16,4 @@ game m p₀ = proc c → do
 
   p ← player p₀ ⤙ c
 
-  returnA ⤙ (Game p m)
+  returnA ⤙ Game p m
