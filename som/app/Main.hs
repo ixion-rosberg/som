@@ -96,7 +96,9 @@ keyMap ks b = maybeToEvent $ find =≪ case b of
   DpadRight → Just Key'D
   Circle    → Just Key'Space
   L1        → Just Key'Left
+  L2        → Just Key'Up
   R1        → Just Key'Right
+  R2        → Just Key'Down
   _ → Nothing
 
   where find = (ks !?) ↣ \ case
