@@ -1,0 +1,14 @@
+cabal-version: 3.14
+name:          gltf2mhm
+version:       0.1.0.0
+author:        イクシオン・ロズベルグ
+category:      Game
+build-type:    Simple
+
+executable gltf2mhm
+    ghc-options:      -Wall
+    main-is:          Main.hs
+    build-depends:    base ^>=4.20.0.0
+                    , som-base
+    hs-source-dirs:   app
+    default-language: GHC2024
