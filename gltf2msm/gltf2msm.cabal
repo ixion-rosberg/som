@@ -33,7 +33,6 @@ library
     import:          shared
     exposed-modules: SOM.GlTF
                    , Control.Monad.Except.Extra
-                   , Data.Binary.Extra
                    , UnliftIO.Exception.Extra
     hs-source-dirs:  src
 

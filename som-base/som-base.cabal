@@ -11,9 +11,11 @@ library
                       , SOM.Binary.Piece
                       , SOM.Binary.Texture
                       , SOM.CLI
+                      , Data.Binary.Extra
     build-depends:      base ^>=4.20.0.0
                       , base-unicode-symbols
                       , binary
+                      , bytestring
                       , derive-storable
                       , filepath
                       , linear
