@@ -22,24 +22,21 @@ import UnliftIO.Exception
 
 main ∷ IO ()
 main = (flip catches) handlers do
-      o ← execParser $ info parser fullDesc
+  o ← execParser $ info parser fullDesc
 
-      g ← (lift ∘ parse ↢ lift ↢ fromFile) o.input
+  g ← (lift ∘ parse ↢ lift ↢ fromFile) o.input
 
-      b ← loadBufferData g
+  b ← loadBufferData g
 
-      ps ← lift $ access b g.mesh.position
-      ns ← lift $ access b g.mesh.normal
-      ts ← lift $ access b g.mesh.texCoord
-      is ← lift $ access b g.mesh.indices
+  ps ← lift $ access b g.mesh.position
+  ns ← lift $ access b g.mesh.normal
+  ts ← lift $ access b g.mesh.texCoord
+  is ← lift $ access b g.mesh.indices
 
-      let vs = zipWith3 vertex ps ns ts
-          is' = (.unUnsignedShort) <$> is
+  let vs = zipWith3 vertex ps ns ts
+      is' = (.unUnsignedShort) <$> is
 
-      encodeFile (outputOrExtension "msm" o) (Model vs is')
-
-      pure ()
-
+  encodeFile (outputOrExtension "msm" o) (Model vs is')
   where
     lift = fromEither ∘ mapLeft stringException
     vertex p n t = Vertex ((.unIEEE) <$> p) ((.unIEEE) <$> n) ((.unIEEE) <$> t)

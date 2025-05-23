@@ -5,7 +5,7 @@ author:        イクシオン・ロズベルグ
 category:      Game
 build-type:    Simple
 
-common shared
+executable gltf2msm
     ghc-options:        -Wall
     default-language:   GHC2024
     default-extensions: BlockArguments
@@ -19,25 +19,11 @@ common shared
                       , som-base
                       , som-gltf
                       , binary
-                      , bytestring
                       , extra
                       , gltf-codec
                       , linear
                       , mtl
                       , optparse-applicative
-                      , text
                       , unliftio
-                      , unordered-containers
-                      , vector
-
-library
-    import:          shared
-    exposed-modules: Control.Monad.Except.Extra
-                   , UnliftIO.Exception.Extra
-    hs-source-dirs:  src
-
-executable gltf2msm
-    import:         shared
-    main-is:        Main.hs
-    build-depends:  gltf2msm
-    hs-source-dirs: app
+    main-is:          Main.hs
+    hs-source-dirs:   app
