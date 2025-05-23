@@ -48,20 +48,38 @@ main = do
   where width  = 800
         height = 600
         init = const NoEvent
-        p₀ = V3 2 0 -1
+        p₀ = V3 4 0 -4
 
         loadMap = do
-          f ← loadPiece "som/bin/floor.msm" "som/bin/floor.txr"
+          f ← loadPiece "som/bin/floor.msm" "som/bin/set.txr"
+          w ← loadPiece "som/bin/wall.msm" "som/bin/set.txr"
+          c ← loadPiece "som/bin/corner.msm" "som/bin/set.txr"
 
-          pure $ Map.create [ f 0 0 South
-                            , f 0 1 South
-                            , f 0 2 South
-                            , f 1 0 South
+          pure $ Map.create [ c 0 0 East
+                            , w 0 1 South
+                            , w 0 2 South
+                            , w 0 3 South
+                            , c 0 4 South
+                            , w 1 0 East
                             , f 1 1 South
                             , f 1 2 South
-                            , f 2 0 South
+                            , f 1 3 South
+                            , w 1 4 West
+                            , w 2 0 East
                             , f 2 1 South
                             , f 2 2 South
+                            , f 2 3 South
+                            , w 2 4 West
+                            , w 3 0 East
+                            , f 3 1 South
+                            , f 3 2 South
+                            , f 3 3 South
+                            , w 3 4 West
+                            , c 4 0 North
+                            , w 4 1 North
+                            , w 4 2 North
+                            , w 4 3 North
+                            , c 4 4 West
                             ]
 
 

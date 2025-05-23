@@ -25,6 +25,5 @@ forward, up ∷ Direction
 forward = V3 0 0 -1
 up = V3 0 1 0
 
-
 rightOf ∷ V3 Float → V3 Float
 rightOf = normalize ∘ (V3.× up)
