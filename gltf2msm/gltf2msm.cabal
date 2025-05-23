@@ -17,6 +17,7 @@ common shared
                       , UnicodeSyntax
     build-depends:      base ^>=4.20.0.0
                       , som-base
+                      , som-gltf
                       , binary
                       , bytestring
                       , extra
@@ -31,8 +32,7 @@ common shared
 
 library
     import:          shared
-    exposed-modules: SOM.GlTF
-                   , Control.Monad.Except.Extra
+    exposed-modules: Control.Monad.Except.Extra
                    , UnliftIO.Exception.Extra
     hs-source-dirs:  src
 

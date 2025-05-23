@@ -6,9 +6,25 @@ category:      Game
 build-type:    Simple
 
 library
-    ghc-options:      -Wall
-    -- exposed-modules:
-    build-depends:    base ^>=4.20.0.0
-                    , som-base
-    hs-source-dirs:   src
-    default-language: GHC2024
+    ghc-options:        -Wall
+    default-language:   GHC2024
+    default-extensions: BlockArguments
+                      , DuplicateRecordFields
+                      , NoFieldSelectors
+                      , NoImplicitPrelude
+                      , OverloadedRecordDot
+                      , OverloadedStrings
+                      , UnicodeSyntax
+    exposed-modules:    SOM.GlTF
+    build-depends:      base ^>=4.20.0.0
+                      , som-base
+                      , binary
+                      , bytestring
+                      , extra
+                      , gltf-codec
+                      , linear
+                      , text
+                      , unliftio
+                      , unordered-containers
+                      , vector
+    hs-source-dirs:     src
