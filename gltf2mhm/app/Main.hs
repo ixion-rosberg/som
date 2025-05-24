@@ -5,6 +5,7 @@ import SOM.Prelude
 import SOM.Binary.Piece (CollisionShape (..), Face (..), Triangle (..))
 import SOM.CLI (Options (..), handlers, outputOrExtension, parser)
 import SOM.GlTF (GlTF (..), Mesh (..), access, loadBufferData, parse)
+import SOM.Normal (Normal (..))
 
 import Codec.GlTF (fromFile)
 
@@ -34,7 +35,7 @@ main = (flip catches) handlers do
   is ← lift $ access b g.mesh.indices
 
   let ps' = (fmap ∘ fmap) (.unIEEE) ps
-      ns' = (fmap ∘ fmap) (.unIEEE) ns
+      ns' = (Normal ∘ fmap (.unIEEE)) <$> ns
       is' = (fromIntegral ∘ (.unUnsignedShort)) <$> is
 
   c ← note $ CollisionShape <$> faces ps' ns' is'
