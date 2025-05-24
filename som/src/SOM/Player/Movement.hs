@@ -3,7 +3,6 @@ module SOM.Player.Movement (Movement (..), acceleration, headBobbing, movement) 
 import SOM.Prelude
 
 import SOM.Controller (Button (..), Dpad (..), Controller (..))
-import SOM.Physics (Acceleration, Velocity)
 
 import Control.Arrow (returnA)
 import Control.Monad (guard)
@@ -20,6 +19,8 @@ import Linear.V3 (V3 (..))
 data Movement = Standing | Moving Speed Direction
 
 type Direction = V2 Float
+type Acceleration = V3 Float
+type Velocity = V3 Float
 
 data Speed = Normal | Dash deriving Eq
 

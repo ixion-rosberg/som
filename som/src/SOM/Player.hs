@@ -6,7 +6,6 @@ import SOM.Collision (BoundingSphere (..), Collision (..), (╳))
 import SOM.Controller (Button (..), Controller (..), Dpad (..))
 import SOM.Map (Map, collisionShapes)
 import SOM.Normal (Normal (..))
-import SOM.Physics (Position, forward, rightOf, up)
 import SOM.Player.Movement (acceleration, headBobbing, movement)
 
 import Control.Arrow (returnA)
@@ -19,11 +18,12 @@ import Linear.Metric.Unicode ((⋅))
 import Linear.Projection (lookAt)
 import Linear.Quaternion (axisAngle, rotate)
 import Linear.V3 (V3 (..))
+import Linear.V3.Unicode qualified as V3 ((×))
 import Linear.Vector.Extra qualified as V (integral)
 
 data Player = Player { view ∷ M44 Float }
 
-player ∷ Map → Position → SF Controller Player
+player ∷ Map → V3 Float → SF Controller Player
 player ma p₀ = proc c → do
   let mo = movement c
 
@@ -32,7 +32,7 @@ player ma p₀ = proc c → do
   rec
     θl ← integral ⤙ look θl c
 
-  let l = axisAngle (rightOf (rotate t forward)) θl
+  let l = axisAngle ((rotate t forward) V3.× up) θl
 
   rec
     v ← V.integral ⤙ acceleration v mo
@@ -67,3 +67,6 @@ player ma p₀ = proc c → do
       where resolve n x = if n.unNormal ⋅ x < 0
               then x - project n.unNormal x
               else x
+
+    forward = V3 0 0 -1
+    up      = V3 0 1 0

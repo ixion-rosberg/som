@@ -13,12 +13,6 @@ import SOM.Renderer.Texture (bind)
 import SOM.Renderer.Uniform (setUniform)
 import SOM.Viewport (Viewport, clear, perspective)
 
-import Graphics.GL (GLfloat)
-
-import Linear.Matrix (M44)
-import Linear.Projection (lookAt)
-import Linear.V3 (V3 (..))
-
 import UnliftIO (MonadUnliftIO)
 
 data Renderer = Renderer { viewport ∷ Viewport, program ∷ Program }
@@ -40,6 +34,3 @@ draw r g = do
       bind p.texture
       setUniform r.program "model" p.transformation
       Model.draw p.model
-
-    view ∷ M44 GLfloat
-    view = lookAt (V3 0 1.8 -1) (V3 1 1.8 -1) (V3 0 1 0)
