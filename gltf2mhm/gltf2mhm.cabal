@@ -6,9 +6,18 @@ category:      Game
 build-type:    Simple
 
 executable gltf2mhm
-    ghc-options:      -Wall
-    main-is:          Main.hs
-    build-depends:    base ^>=4.20.0.0
-                    , som-base
-    hs-source-dirs:   app
-    default-language: GHC2024
+    ghc-options:        -Wall
+    default-language:   GHC2024
+    default-extensions: BlockArguments
+                      , OverloadedRecordDot
+                      , UnicodeSyntax
+    build-depends:      base ^>=4.20.0.0
+                      , som-base
+                      , som-gltf
+                      , binary
+                      , extra
+                      , gltf-codec
+                      , optparse-applicative
+                      , unliftio
+    main-is:            Main.hs
+    hs-source-dirs:     app
