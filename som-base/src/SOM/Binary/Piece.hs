@@ -8,6 +8,8 @@ module SOM.Binary.Piece
 
 import SOM.Prelude
 
+import SOM.Normal (Normal)
+
 import Data.Binary (Binary)
 import Data.Word (Word16)
 
@@ -36,7 +38,7 @@ newtype CollisionShape = CollisionShape { faces ∷ [Face] } deriving Generic
 
 instance Binary CollisionShape
 
-data Face = Face { normal ∷ V3 Float, triangle ∷ Triangle } deriving Generic
+data Face = Face { normal ∷ Normal Float, triangle ∷ Triangle } deriving Generic
 
 instance Binary Face
 

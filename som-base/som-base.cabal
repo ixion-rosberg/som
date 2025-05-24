@@ -17,6 +17,7 @@ library
                       , SOM.Binary.Texture
                       , SOM.CLI
                       , Data.Binary.Extra
+                      , SOM.Normal
     build-depends:      base ^>=4.20.0.0
                       , base-unicode-symbols
                       , binary

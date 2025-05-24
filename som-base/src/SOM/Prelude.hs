@@ -19,7 +19,7 @@ import Prelude as E hiding
   , (>>)
   )
 
-import Prelude.Unicode as E hiding ((‼))
+import Prelude.Unicode as E hiding ((‼), (⋅))
 
 import Control.Arrow (Arrow, (^>>), (^<<), (>>^), (<<^))
 import Control.Arrow.Unicode as E
