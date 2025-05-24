@@ -18,6 +18,7 @@ common shared
                       , PatternSynonyms
                       , RequiredTypeArguments
                       , StrictData
+                      , TypeFamilies
                       , UnicodeSyntax
     build-depends:      base ^>=4.20.0.0
                       , som-base
@@ -27,6 +28,7 @@ common shared
                       , extra
                       , gl
                       , GLFW-b
+                      , lens
                       , linear
                       , mtl
                       , time
@@ -37,7 +39,8 @@ common shared
 
 library
     import:          shared
-    exposed-modules: SOM.Controller
+    exposed-modules: SOM.Collision
+                   , SOM.Controller
                    , SOM.Game
                    , SOM.Map
                    , SOM.Physics
@@ -48,6 +51,7 @@ library
                    , SOM.Renderer.Program
                    , SOM.Renderer.Texture
                    , SOM.Renderer.Uniform
+                   , SOM.Transform
                    , SOM.Viewport
                    , SOM.Window
                    , Data.Binary.Lifted
@@ -56,6 +60,7 @@ library
                    , Foreign.Extra
                    , Foreign.Lifted
                    , Graphics.UI.GLFW.Lifted
+                   , Linear.Metric.Unicode
                    , Linear.V3.Unicode
                    , Linear.Vector.Extra
                    , System.IO.Lifted

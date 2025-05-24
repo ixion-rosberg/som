@@ -14,6 +14,6 @@ data Game = Game { player ∷ Player, map ∷ Map }
 game ∷ Map → Position → SF Controller Game
 game m p₀ = proc c → do
 
-  p ← player p₀ ⤙ c
+  p ← player m p₀ ⤙ c
 
   returnA ⤙ Game p m

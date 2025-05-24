@@ -51,9 +51,9 @@ main = do
         p₀ = V3 4 0 -4
 
         loadMap = do
-          f ← loadPiece "som/bin/floor.msm" "som/bin/set.txr"
-          w ← loadPiece "som/bin/wall.msm" "som/bin/set.txr"
-          c ← loadPiece "som/bin/corner.msm" "som/bin/set.txr"
+          f ← loadPiece "som/bin/floor.msm" "som/bin/floor.mhm" "som/bin/set.txr"
+          w ← loadPiece "som/bin/wall.msm" "som/bin/wall.mhm" "som/bin/set.txr"
+          c ← loadPiece "som/bin/corner.msm" "som/bin/corner.mhm" "som/bin/set.txr"
 
           pure $ Map.create [ c 0 0 East
                             , w 0 1 South
@@ -83,10 +83,10 @@ main = do
                             ]
 
 
-        loadPiece m t = do
+        loadPiece m c t = do
           (Model vs is) ← decodeFile m
 
-          PieceSetup <$> Model.load vs is <*> Texture.load t
+          PieceSetup <$> Model.load vs is <*> decodeFile c <*> Texture.load t
 
 sense ∷ MonadIO μ ⇒ Window → IORef UTCTime → Bool → μ (Double, Maybe (ButtonName → Event Bool))
 sense w r _ = do

@@ -2,7 +2,10 @@ module SOM.Player (Player (..), player) where
 
 import SOM.Prelude
 
+import SOM.Collision (BoundingSphere (..), Collision (..), (╳))
 import SOM.Controller (Button (..), Controller (..), Dpad (..))
+import SOM.Map (Map, collisionShapes)
+import SOM.Normal (Normal (..))
 import SOM.Physics (Position, forward, rightOf, up)
 import SOM.Player.Movement (acceleration, headBobbing, movement)
 
@@ -11,6 +14,8 @@ import Control.Arrow (returnA)
 import FRP.Yampa (SF, integral)
 
 import Linear.Matrix (M44)
+import Linear.Metric (project)
+import Linear.Metric.Unicode ((⋅))
 import Linear.Projection (lookAt)
 import Linear.Quaternion (axisAngle, rotate)
 import Linear.V3 (V3 (..))
@@ -18,9 +23,9 @@ import Linear.Vector.Extra qualified as V (integral)
 
 data Player = Player { view ∷ M44 Float }
 
-player ∷ Position → SF Controller Player
-player p₀ = proc c → do
-  let m = movement c
+player ∷ Map → Position → SF Controller Player
+player ma p₀ = proc c → do
+  let mo = movement c
 
   t ← axisAngle up ^≪ integral ⤙ turn c
 
@@ -30,10 +35,14 @@ player p₀ = proc c → do
   let l = axisAngle (rightOf (rotate t forward)) θl
 
   rec
-    v ← V.integral ⤙ acceleration v m
+    v ← V.integral ⤙ acceleration v mo
+    p ← (p₀ +) ^≪ V.integral ⤙ (resolveCollisions cs ∘ rotate t) v
 
-  p ← (p₀ +) ^≪ V.integral ⤙ rotate t v
-  h ← headBobbing ⤙ m
+    let b  = BoundingSphere (p + V3 0 1.8 0) 0.5
+        cs = (b ╳) =≪ collisionShapes ma
+ 
+  h ← headBobbing ⤙ mo
+
 
   returnA ⤙ Player (view p h (l × t))
 
@@ -54,3 +63,7 @@ player p₀ = proc c → do
       where θmax = π ÷ 4
             θmin = -θmax
 
+    resolveCollisions cs v = foldr resolve v ((.normal) <$> cs)
+      where resolve n x = if n.unNormal ⋅ x < 0
+              then x - project n.unNormal x
+              else x
