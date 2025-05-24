@@ -7,6 +7,11 @@ build-type:    Simple
 
 library
     ghc-options:        -Wall
+    default-language:   GHC2024
+    default-extensions: DuplicateRecordFields
+                      , NoImplicitPrelude
+                      , OverloadedRecordDot
+                      , UnicodeSyntax
     exposed-modules:    SOM.Prelude
                       , SOM.Binary.Piece
                       , SOM.Binary.Texture
@@ -22,7 +27,3 @@ library
                       , optparse-applicative
                       , unliftio
     hs-source-dirs:     src
-    default-language:   GHC2024
-    default-extensions: NoImplicitPrelude
-                      , OverloadedRecordDot
-                      , UnicodeSyntax
