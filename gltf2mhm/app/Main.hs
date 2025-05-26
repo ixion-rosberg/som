@@ -4,7 +4,7 @@ import SOM.Prelude
 
 import SOM.Binary.Piece (CollisionShape (..), Face (..), Triangle (..))
 import SOM.CLI (Options (..), handlers, outputOrExtension, parser)
-import SOM.GlTF (GlTF (..), Mesh (..), access, loadBufferData, parse)
+import SOM.GlTF (Accessor (..), GlTF (..), Mesh (..), access, loadBuffers, parse)
 import SOM.Normal (Normal (..))
 
 import Codec.GlTF (fromFile)
@@ -28,9 +28,9 @@ main = (flip catches) handlers do
 
   g ← (lift ∘ parse ↢ lift ↢ fromFile) o.input
 
-  b ← loadBufferData g
+  b ← loadBuffers g
 
-  ps ← lift $ access b g.mesh.position
+  ps ← lift $ access b g.mesh.position.bufferView
   ns ← lift $ access b g.mesh.normal
   is ← lift $ access b g.mesh.indices
 
