@@ -1,0 +1,15 @@
+cabal-version: 3.14
+name:          gltf2mdl
+version:       0.1.0.0
+author:        イクシオン・ロズベルグ
+category:      Game
+build-type:    Simple
+
+executable gltf2mdl
+    ghc-options:        -Wall
+    default-language:   GHC2024
+    default-extensions: UnicodeSyntax
+    build-depends:      base ^>=4.20.0.0
+                      , som-base
+    main-is:            Main.hs
+    hs-source-dirs:     app

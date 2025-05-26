@@ -1,6 +1,7 @@
 packages: som-base/som-base.cabal
         , som-gltf/som-gltf.cabal
         , som/som.cabal
+        , gltf2mdl/gltf2mdl.cabal
         , gltf2mhm/gltf2mhm.cabal
         , gltf2msm/gltf2msm.cabal
         , png2txr/png2txr.cabal
