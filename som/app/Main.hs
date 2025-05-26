@@ -2,7 +2,6 @@ module Main where
 
 import SOM.Prelude
 
-import SOM.Binary.Piece (Model (..))
 import SOM.Controller (ButtonName (..), controller)
 import SOM.Game (Game, game)
 import SOM.Map (Orientation (..), PieceSetup (..))
@@ -10,11 +9,9 @@ import SOM.Map qualified as Map (create)
 import SOM.Viewport qualified as Viewport (create)
 import SOM.Window (Window, shouldClose, update, inputs)
 import SOM.Window qualified as Window (create)
-import SOM.Renderer (Renderer, draw)
+import SOM.Renderer (Renderer, draw, loadPiece)
 import SOM.Renderer qualified as Renderer (create)
-import SOM.Renderer.Model qualified as Model (load)
 import SOM.Renderer.Program (ShaderType (..))
-import SOM.Renderer.Texture qualified as Texture (load)
 
 import Control.Monad.IO.Class (MonadIO)
 
@@ -41,7 +38,7 @@ main = do
                         ]
   t ← newIORef =≪ getCurrentTime
 
-  m ← loadMap
+  m ← loadMap r
 
   reactimate (pure init) (sense w t) (actuate w r) (controller ⋙ game m p₀)
 
@@ -50,10 +47,10 @@ main = do
         init = const NoEvent
         p₀ = V3 4 0 -4
 
-        loadMap = do
-          f ← loadPiece "som/bin/floor.msm" "som/bin/floor.mhm" "som/bin/set.txr"
-          w ← loadPiece "som/bin/wall.msm" "som/bin/wall.mhm" "som/bin/set.txr"
-          c ← loadPiece "som/bin/corner.msm" "som/bin/corner.mhm" "som/bin/set.txr"
+        loadMap r = do
+          f ← load r "som/bin/floor.msm" "som/bin/floor.mhm" "som/bin/set.txr"
+          w ← load r "som/bin/wall.msm" "som/bin/wall.mhm" "som/bin/set.txr"
+          c ← load r "som/bin/corner.msm" "som/bin/corner.mhm" "som/bin/set.txr"
 
           pure $ Map.create [ c 0 0 East
                             , w 0 1 South
@@ -83,10 +80,12 @@ main = do
                             ]
 
 
-        loadPiece m c t = do
-          (Model vs is) ← decodeFile m
+        load r m c t = do
+          d ← loadPiece r m t
+          cs ← decodeFile c
 
-          PieceSetup <$> Model.load vs is <*> decodeFile c <*> Texture.load t
+          pure (PieceSetup d cs)
+
 
 sense ∷ MonadIO μ ⇒ Window → IORef UTCTime → Bool → μ (Double, Maybe (ButtonName → Event Bool))
 sense w r _ = do

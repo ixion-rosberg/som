@@ -1,17 +1,23 @@
-module SOM.Renderer (Renderer, create, draw) where
+module SOM.Renderer (Draw (..), Renderer, create, draw, loadPiece) where
 
 import SOM.Prelude
 
-import SOM.Map (Piece (..), pieces)
-
+import SOM.Binary.Piece (Model (..))
 import SOM.Game (Game (..))
+import SOM.Map (Piece (..), pieces)
 import SOM.Player (Player (..))
-import SOM.Renderer.Model qualified as Model (draw)
+import SOM.Renderer.Draw (Draw (..))
+import SOM.Renderer.Model qualified as Model (draw, load)
 import SOM.Renderer.Program (Program, Source, enable)
 import SOM.Renderer.Program qualified as Program (create)
 import SOM.Renderer.Texture (bind)
+import SOM.Renderer.Texture qualified as Texture (load)
 import SOM.Renderer.Uniform (setUniform)
 import SOM.Viewport (Viewport, clear, perspective)
+
+import Data.Binary.Lifted (decodeFile)
+
+import Linear.Matrix (M44)
 
 import UnliftIO (MonadUnliftIO)
 
@@ -30,7 +36,17 @@ draw r g = do
   where
     drawMap m = mapM_ drawPiece (pieces m)
 
-    drawPiece p = do
-      bind p.texture
-      setUniform r.program "model" p.transformation
-      Model.draw p.model
+    drawPiece p = case p.draw of
+      Draw d → d
+
+loadPiece ∷ MonadUnliftIO μ ⇒ Renderer → FilePath → FilePath → μ (M44 Float → Draw)
+loadPiece r fm ft = do
+  (Model vs is) ← decodeFile fm
+  t ← Texture.load ft
+
+  m ← Model.load vs is
+
+  pure \ tr → Draw do
+    bind t
+    setUniform r.program "model" tr
+    Model.draw m

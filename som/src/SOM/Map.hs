@@ -11,6 +11,7 @@ module SOM.Map
 import SOM.Prelude
 
 import SOM.Binary.Piece (CollisionShape)
+import SOM.Renderer.Draw (Draw (..))
 import SOM.Renderer.Model (Model)
 import SOM.Renderer.Texture (Texture)
 import SOM.Transform (transform)
@@ -24,15 +25,13 @@ import Linear.V3 (V3 (..))
 
 data Map = Map (M.Map (ℕ, ℕ) Piece)
 
-data Piece = Piece { model          ∷ Model
+data Piece = Piece { draw           ∷ Draw
                    , collisionShape ∷ CollisionShape
-                   , texture        ∷ Texture
                    , transformation ∷ M44 Float
                    }
 
-data PieceSetup = PieceSetup { model          ∷ Model
+data PieceSetup = PieceSetup { draw           ∷ M44 Float → Draw
                              , collisionShape ∷ CollisionShape
-                             , texture        ∷ Texture
                              , x              ∷ ℕ
                              , z              ∷ ℕ
                              , orientation    ∷ Orientation
@@ -43,7 +42,7 @@ data Orientation = South | East | North | West
 create ∷ [PieceSetup] → Map
 create = Map ∘ fromList ∘ fmap piece
   where
-    piece p = ((p.x, p.z), Piece p.model p.collisionShape p.texture transformation)
+    piece p = ((p.x, p.z), Piece (p.draw transformation) p.collisionShape transformation)
       where
         transformation = mkTransformation orientation position
         orientation = axisAngle (V3 0 1 0) case p.orientation of

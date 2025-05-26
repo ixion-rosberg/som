@@ -46,6 +46,7 @@ library
                    , SOM.Player
                    , SOM.Player.Movement
                    , SOM.Renderer
+                   , SOM.Renderer.Draw
                    , SOM.Renderer.Model
                    , SOM.Renderer.Program
                    , SOM.Renderer.Texture
