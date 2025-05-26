@@ -1,4 +1,11 @@
-module SOM.Binary.Animated (Animation (..), Joint(..), Keyframe (..), Model (..), Vertex (..)) where
+module SOM.Binary.Animated
+  ( Animation (..)
+  , Bounds (..)
+  , Joint (..)
+  , Keyframe (..)
+  , Model (..)
+  , Vertex (..)
+  ) where
 
 import SOM.Prelude
 
