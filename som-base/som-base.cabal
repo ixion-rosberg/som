@@ -13,6 +13,7 @@ library
                       , OverloadedRecordDot
                       , UnicodeSyntax
     exposed-modules:    SOM.Prelude
+                      , SOM.Binary.Animated
                       , SOM.Binary.Piece
                       , SOM.Binary.Texture
                       , SOM.CLI
