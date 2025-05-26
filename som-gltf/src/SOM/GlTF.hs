@@ -4,6 +4,7 @@ module SOM.GlTF
   , AnimationSampler (..)
   , AnimationSamplers (..)
   , Buffers
+  , BufferView (..)
   , GlTF (..)
   , Mesh (..)
   , Skin (..)
@@ -66,7 +67,7 @@ data Mesh = Mesh { position ∷ Accessor (V3 IEEE)
                  , texCoord ∷ BufferView (V2 IEEE)
                  , indices  ∷ BufferView UnsignedShort
                  , joints   ∷ Maybe (BufferView (V4 UnsignedShort))
-                 , weights  ∷ Maybe (BufferView (V4 Float))
+                 , weights  ∷ Maybe (BufferView (V4 IEEE))
                  }
 
 data Accessor α = Accessor { bufferView ∷ BufferView α, min ∷ α, max ∷ α }
