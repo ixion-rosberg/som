@@ -77,7 +77,7 @@ main = (flip catches) handlers do
       <*> accessMaybe b "Missing joints" m.joints
       <*> accessMaybe b "Missing weights" m.weights
 
-    vertex p n t j w = Vertex (coerce p) (coerce n) (coerce t) (coerce j) (coerce w)
+    vertex p n t j w = Vertex (coerce p) (coerce n) (coerce t) (fmap fromIntegral j) (coerce w)
 
     accessMaybe b m = access b ↢ maybeToEither m
 
