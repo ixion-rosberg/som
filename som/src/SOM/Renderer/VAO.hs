@@ -1,14 +1,9 @@
-module SOM.Renderer.Model (Model, draw, load) where
+module SOM.Renderer.VAO (VAO, VertexAttribute (..), create, draw) where
 
 import SOM.Prelude
 
-import SOM.Binary.Piece qualified as Piece (Vertex)
-
 import Control.Monad (foldM_)
 import Control.Monad.IO.Class (MonadIO)
-
-import Data.Vector.Storable (fromList)
-import Data.Vector.Storable.Lifted (unsafeWith)
 
 import Foreign (Storable, castPtr, nullPtr)
 import Foreign.Extra (query, sizeOf)
@@ -41,18 +36,13 @@ import Linear.V2 (V2)
 import Linear.V3 (V3)
 
 import UnliftIO (MonadUnliftIO)
+import UnliftIO.Foreign (withArray)
 
-data Model = Model { vao ∷ GLuint, count ∷ GLsizei }
-
-class Storable α ⇒ Vertex α where
-  attributeFormats ∷ ∀ α' → α' ~ α ⇒ [VertexAttributeFormat]
-
-instance Vertex Piece.Vertex where
-  attributeFormats _ = [ format (V3 GLfloat), format (V3 GLfloat), format (V2 GLfloat) ]
+data VAO = VAO { id ∷ GLuint, count ∷ GLsizei }
 
 type Index = GLushort
 
-data VertexAttributeFormat = VertexAttributeFormat { count ∷ GLint, aType ∷ GLenum, size ∷ GLuint }
+data VertexAttributeFormat = VertexAttributeFormat { count ∷ GLint, attributeType ∷ GLenum, size ∷ GLuint }
 
 data VertexAttributeIndex = VertexAttributeIndex { index ∷ GLuint, offset ∷ GLuint }
 
@@ -63,16 +53,15 @@ instance VertexAttribute GLfloat where
   format _ = VertexAttributeFormat 1 GL_FLOAT (fromIntegral (sizeOf GLfloat))
 
 instance (Storable α, VertexAttribute α) ⇒ VertexAttribute (V2 α) where
-  format _ = VertexAttributeFormat (2 × f.count) f.aType (2 × f.size)
+  format _ = VertexAttributeFormat (2 × f.count) f.attributeType (2 × f.size)
     where f = format α
 
 instance (Storable α, VertexAttribute α) ⇒ VertexAttribute (V3 α) where
-  format _ = VertexAttributeFormat (3 × f.count) f.aType (3 × f.size)
+  format _ = VertexAttributeFormat (3 × f.count) f.attributeType (3 × f.size)
     where f = format α
 
-load ∷ ∀ α μ. (Vertex α, MonadUnliftIO μ) ⇒ [α] → [Index] → μ Model
-load vs is = do
-
+create ∷ ∀ α μ. (Storable α, MonadUnliftIO μ) ⇒ [VertexAttributeFormat] → [α] → [Index] → μ VAO
+create fs vs is = do
   vbo ← createBuffer vs
   ebo ← createBuffer is
 
@@ -81,16 +70,16 @@ load vs is = do
   glVertexArrayVertexBuffer vao 0 vbo 0 (fromIntegral (sizeOf α))
   glVertexArrayElementBuffer vao ebo
 
-  foldM_ (setAttribute vao) (VertexAttributeIndex 0 0) (attributeFormats α)
+  foldM_ (setAttribute vao) (VertexAttributeIndex 0 0) fs
 
-  pure $ Model vao count
+  pure $ VAO vao count
 
   where
     createBuffer ∷ ∀ β. Storable β ⇒ [β] → μ GLuint
     createBuffer xs = do
       b ← query $ glCreateBuffers 1
 
-      unsafeWith (fromList xs) (buffer b)
+      withArray xs (buffer b)
 
       pure b
       where
@@ -100,13 +89,13 @@ load vs is = do
     setAttribute vao i f = do
 
       glEnableVertexArrayAttrib vao i.index
-      glVertexArrayAttribFormat vao i.index f.count f.aType GL_FALSE i.offset
+      glVertexArrayAttribFormat vao i.index f.count f.attributeType GL_FALSE i.offset
       glVertexArrayAttribBinding vao i.index 0
 
       pure (i { index = i.index + 1, offset = i.offset + f.size })
 
     count = (fromIntegral ∘ length) is
 
-draw ∷ MonadIO μ ⇒ Model → μ ()
-draw m = glBindVertexArray m.vao
-  *> glDrawElements GL_TRIANGLES m.count GL_UNSIGNED_SHORT nullPtr
+draw ∷ MonadIO μ ⇒ VAO → μ ()
+draw v = glBindVertexArray v.id
+  *> glDrawElements GL_TRIANGLES v.count GL_UNSIGNED_SHORT nullPtr

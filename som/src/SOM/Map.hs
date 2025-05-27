@@ -12,8 +12,6 @@ import SOM.Prelude
 
 import SOM.Binary.Piece (CollisionShape)
 import SOM.Renderer.Draw (Draw (..))
-import SOM.Renderer.Model (Model)
-import SOM.Renderer.Texture (Texture)
 import SOM.Transform (transform)
 
 import Data.Map.Strict (elems, fromList)

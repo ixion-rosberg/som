@@ -42,10 +42,7 @@ load f = do
 
   t ← query $ glCreateTextures GL_TEXTURE_2D 1
 
-  glTextureParameteri t GL_TEXTURE_WRAP_S     GL_CLAMP_TO_EDGE
-  glTextureParameteri t GL_TEXTURE_WRAP_T     GL_CLAMP_TO_EDGE
-  glTextureParameteri t GL_TEXTURE_MAG_FILTER GL_LINEAR
-  glTextureParameteri t GL_TEXTURE_MIN_FILTER GL_LINEAR
+  mapM_ (uncurry (glTextureParameteri t)) parameters
 
   glTextureStorage2D t 1 GL_RGBA8 w h
 
@@ -54,6 +51,12 @@ load f = do
   glGenerateTextureMipmap t
 
   pure (Texture t)
+
+  where parameters = [ (GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE)
+                     , (GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE)
+                     , (GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+                     , (GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                     ]
 
 bind ∷ MonadIO μ ⇒ Texture → μ ()
 bind (Texture t) = glBindTextureUnit 0 t

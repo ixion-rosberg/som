@@ -47,10 +47,10 @@ library
                    , SOM.Player.Movement
                    , SOM.Renderer
                    , SOM.Renderer.Draw
-                   , SOM.Renderer.Model
                    , SOM.Renderer.Program
                    , SOM.Renderer.Texture
                    , SOM.Renderer.Uniform
+                   , SOM.Renderer.VAO
                    , SOM.Transform
                    , SOM.Viewport
                    , SOM.Window
