@@ -46,6 +46,7 @@ import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Data.Vector (Vector, find, toList, (!?))
 import Data.Vector qualified as V (filter)
+import Data.Word (Word8)
 
 import Linear.Matrix (M44, mkTransformation, (!*!))
 import Linear.Quaternion (Quaternion (..))
@@ -66,7 +67,7 @@ data Mesh = Mesh { position ∷ Accessor (V3 IEEE)
                  , normal   ∷ BufferView (V3 IEEE)
                  , texCoord ∷ BufferView (V2 IEEE)
                  , indices  ∷ BufferView UnsignedShort
-                 , joints   ∷ Maybe (BufferView (V4 UnsignedShort))
+                 , joints   ∷ Maybe (BufferView (V4 Word8))
                  , weights  ∷ Maybe (BufferView (V4 IEEE))
                  }
 
