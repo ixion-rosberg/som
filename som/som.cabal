@@ -39,7 +39,8 @@ common shared
 
 library
     import:          shared
-    exposed-modules: SOM.Collision
+    exposed-modules: SOM.Animation
+                   , SOM.Collision
                    , SOM.Controller
                    , SOM.Game
                    , SOM.IdentityList

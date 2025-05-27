@@ -2,7 +2,8 @@ module SOM.Renderer (Draw (..), ProgramList (..), Renderer, create, draw, loadAn
 
 import SOM.Prelude
 
-import SOM.Binary.Animated qualified as Animated (Model (..))
+import SOM.Animation (Skin (..))
+import SOM.Binary.Animated qualified as Animated (Joint (..), Model (..))
 import SOM.Binary.Piece qualified as Piece (Model (..))
 import SOM.Game (Game (..))
 import SOM.Map (Piece (..), pieces)
@@ -68,14 +69,17 @@ loadPiece r m t = do
 
   where fs = [ format (V3 GLfloat), format (V3 GLfloat), format (V2 GLfloat) ]
 
-loadAnimated ∷ MonadUnliftIO μ ⇒ Renderer → Animated.Model → Texture → μ (M44 Float → Draw)
+loadAnimated ∷ MonadUnliftIO μ ⇒ Renderer → Animated.Model → Texture → μ (M44 Float → Skin → Draw)
 loadAnimated r m t = do
   enable r.programs.animated
 
   v ← VAO.create fs m.vertices m.indices
 
-  pure \ tr → Draw do
+  pure \ tr s → Draw do
     bind t
+    setUniform r.programs.animated "model" tr
+    setUniform r.programs.animated "joint_transformations" s.transformations
+    setUniform r.programs.animated "joint_ibms" s.inverseBindMatrices
     setUniform r.programs.animated "model" tr
     VAO.draw v
 

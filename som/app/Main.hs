@@ -2,6 +2,8 @@ module Main where
 
 import SOM.Prelude
 
+import SOM.Animation (Skin (..))
+import SOM.Binary.Animated (Joint (..), Model (..))
 import SOM.Controller (ButtonName (..), controller)
 import SOM.Game (Game, game)
 import SOM.Map (Orientation (..), PieceSetup (..))
@@ -99,16 +101,19 @@ main = do
           pure (PieceSetup d c)
 
         loadObjects r = do
-          c ← chest <$> createAnimated r "som/bin/chest.mdl" "som/bin/chest.txr"
+          c ← loadChest r "som/bin/chest.mdl" "som/bin/chest.txr"
 
           pure [ c (V3 6 0.01 -6) ]
 
 
-        createAnimated r fm ft = do
+        loadChest r fm ft = do
           m ← decodeFile fm
           t ← Texture.load ft
+          d ← loadAnimated r m t
 
-          loadAnimated r m t
+          pure $ chest (skin m) m.animation d
+
+        skin m = Skin ((.transformation) <$> m.joints) ((.inverseBindMatrix) <$> m.joints)
 
 
 
