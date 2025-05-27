@@ -40,7 +40,7 @@ data Vertex = Vertex { position ∷ V3 Float
 instance Binary Vertex
 instance GStorable Vertex
 
-data Joint = Joint { transformation ∷ M44 Float
+data Joint = Joint { transformation    ∷ M44 Float
                    , inverseBindMatrix ∷ M44 Float
                    } deriving Generic
 
@@ -56,7 +56,7 @@ newtype Animation = Animation { keyframes ∷ [Keyframe] } deriving Generic
 
 instance Binary Animation
 
-data Keyframe = Keyframe { time ∷ Double
+data Keyframe = Keyframe { time            ∷ Double
                          , transformations ∷ [M44 Float]
                          } deriving Generic
 
