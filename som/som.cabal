@@ -42,7 +42,10 @@ library
     exposed-modules: SOM.Collision
                    , SOM.Controller
                    , SOM.Game
+                   , SOM.IdentityList
                    , SOM.Map
+                   , SOM.Object
+                   , SOM.Objects
                    , SOM.Player
                    , SOM.Player.Movement
                    , SOM.Renderer

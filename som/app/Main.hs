@@ -6,12 +6,14 @@ import SOM.Controller (ButtonName (..), controller)
 import SOM.Game (Game, game)
 import SOM.Map (Orientation (..), PieceSetup (..))
 import SOM.Map qualified as Map (create)
+import SOM.Object (chest)
 import SOM.Viewport qualified as Viewport (create)
 import SOM.Window (Window, shouldClose, update, inputs)
 import SOM.Window qualified as Window (create)
-import SOM.Renderer (Renderer, draw, loadPiece)
+import SOM.Renderer (ProgramList (..), Renderer, draw, loadAnimated, loadPiece)
 import SOM.Renderer qualified as Renderer (create)
 import SOM.Renderer.Program (ShaderType (..))
+import SOM.Renderer.Texture qualified as Texture (load)
 
 import Control.Monad.IO.Class (MonadIO)
 
@@ -33,24 +35,31 @@ main ∷ IO ()
 main = do
   w ← Window.create "Sword of Moonλight" (width, height)
   v ← Viewport.create width height
-  r ← Renderer.create v [ (Vertex, "som/shaders/shader.vert")
-                        , (Fragment, "som/shaders/shader.frag")
-                        ]
+  r ← Renderer.create v sources
   t ← newIORef =≪ getCurrentTime
 
   m ← loadMap r
+  os ← loadObjects r
 
-  reactimate (pure init) (sense w t) (actuate w r) (controller ⋙ game m p₀)
+  reactimate (pure init) (sense w t) (actuate w r) (controller ⋙ game m os p₀)
 
   where width  = 800
         height = 600
         init = const NoEvent
         p₀ = V3 4 0 -4
 
+        sources = ProgramList
+          [ (Vertex,   "som/shaders/piece.vert")
+          , (Fragment, "som/shaders/piece.frag")
+          ]
+          [ (Vertex,   "som/shaders/animated.vert")
+          , (Fragment, "som/shaders/animated.frag")
+          ]
+
         loadMap r = do
-          f ← load r "som/bin/floor.msm" "som/bin/floor.mhm" "som/bin/set.txr"
-          w ← load r "som/bin/wall.msm" "som/bin/wall.mhm" "som/bin/set.txr"
-          c ← load r "som/bin/corner.msm" "som/bin/corner.mhm" "som/bin/set.txr"
+          f ← createPieceSetup r "som/bin/floor.msm" "som/bin/floor.mhm" "som/bin/set.txr"
+          w ← createPieceSetup r "som/bin/wall.msm" "som/bin/wall.mhm" "som/bin/set.txr"
+          c ← createPieceSetup r "som/bin/corner.msm" "som/bin/corner.mhm" "som/bin/set.txr"
 
           pure $ Map.create [ c 0 0 East
                             , w 0 1 South
@@ -80,11 +89,27 @@ main = do
                             ]
 
 
-        load r m c t = do
-          d ← loadPiece r m t
-          cs ← decodeFile c
+        createPieceSetup r fm fc ft = do
+          m ← decodeFile fm
+          c ← decodeFile fc
+          t ← Texture.load ft
 
-          pure (PieceSetup d cs)
+          d ← loadPiece r m t
+
+          pure (PieceSetup d c)
+
+        loadObjects r = do
+          c ← chest <$> createAnimated r "som/bin/chest.mdl" "som/bin/chest.txr"
+
+          pure [ c (V3 6 0.01 -6) ]
+
+
+        createAnimated r fm ft = do
+          m ← decodeFile fm
+          t ← Texture.load ft
+
+          loadAnimated r m t
+
 
 
 sense ∷ MonadIO μ ⇒ Window → IORef UTCTime → Bool → μ (Double, Maybe (ButtonName → Event Bool))

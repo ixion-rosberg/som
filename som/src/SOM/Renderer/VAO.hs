@@ -34,6 +34,7 @@ import Graphics.GL
 
 import Linear.V2 (V2)
 import Linear.V3 (V3)
+import Linear.V4 (V4)
 
 import UnliftIO (MonadUnliftIO)
 import UnliftIO.Foreign (withArray)
@@ -52,12 +53,19 @@ class VertexAttribute α where
 instance VertexAttribute GLfloat where
   format _ = VertexAttributeFormat 1 GL_FLOAT (fromIntegral (sizeOf GLfloat))
 
+instance VertexAttribute GLushort where
+  format _ = VertexAttributeFormat 1 GL_UNSIGNED_SHORT (fromIntegral (sizeOf GLushort))
+
 instance (Storable α, VertexAttribute α) ⇒ VertexAttribute (V2 α) where
   format _ = VertexAttributeFormat (2 × f.count) f.attributeType (2 × f.size)
     where f = format α
 
 instance (Storable α, VertexAttribute α) ⇒ VertexAttribute (V3 α) where
   format _ = VertexAttributeFormat (3 × f.count) f.attributeType (3 × f.size)
+    where f = format α
+
+instance (Storable α, VertexAttribute α) ⇒ VertexAttribute (V4 α) where
+  format _ = VertexAttributeFormat (4 × f.count) f.attributeType (4 × f.size)
     where f = format α
 
 create ∷ ∀ α μ. (Storable α, MonadUnliftIO μ) ⇒ [VertexAttributeFormat] → [α] → [Index] → μ VAO
