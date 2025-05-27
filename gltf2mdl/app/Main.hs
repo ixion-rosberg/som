@@ -105,7 +105,9 @@ main = (flip catches) handlers do
     first = maybeToEither "Missing times" ∘ listToMaybe
 
     times b s = intervals <$> access b s.translation.input
-    intervals = scanl (\ x y → y - x) 0 ∘ fmap (realToFrac ∘ (.unIEEE))
+    intervals = intervals' 0 ∘ fmap (realToFrac ∘ (.unIEEE))
+    intervals' _  []     = []
+    intervals' t₀ (t:ts) = (t - t₀) : (intervals' t ts)
 
     transformations b s = zipWith3 transformation
       <$> access b s.translation.output
