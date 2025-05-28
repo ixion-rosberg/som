@@ -4,12 +4,14 @@ module SOM.Binary.Animated
   , Joint (..)
   , Keyframe (..)
   , Model (..)
+  , Transformation (..)
   , Vertex (..)
   ) where
 
 import SOM.Prelude
 
 import Data.Binary (Binary)
+import Data.List.NonEmpty (NonEmpty)
 import Data.Word (Word16)
 
 import Foreign.Storable.Generic (GStorable)
@@ -17,6 +19,7 @@ import Foreign.Storable.Generic (GStorable)
 import GHC.Generics (Generic)
 
 import Linear.Matrix (M44)
+import Linear.Quaternion (Quaternion)
 import Linear.V2 (V2)
 import Linear.V3 (V3)
 import Linear.V4 (V4)
@@ -52,12 +55,20 @@ data Bounds = Bounds { min ∷ V3 Float
 
 instance Binary Bounds
 
-newtype Animation = Animation { keyframes ∷ [Keyframe] } deriving Generic
+newtype Animation = Animation { transformations ∷ [Transformation] } deriving Generic
 
 instance Binary Animation
 
-data Keyframe = Keyframe { time            ∷ Double
-                         , transformations ∷ [M44 Float]
-                         } deriving Generic
 
-instance Binary Keyframe
+data Transformation = Transformation { translation ∷ NonEmpty (Keyframe (V3 Float))
+                                     , rotation    ∷ NonEmpty (Keyframe (Quaternion Float))
+                                     , scale       ∷ NonEmpty (Keyframe (V3 Float))
+                                     } deriving Generic
+
+instance Binary Transformation
+
+data Keyframe α = Keyframe { time  ∷ Double
+                           , value ∷ α
+                           } deriving Generic
+
+instance Binary α ⇒ Binary (Keyframe α)

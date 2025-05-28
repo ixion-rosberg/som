@@ -9,6 +9,7 @@ library
     ghc-options:        -Wall
     default-language:   GHC2024
     default-extensions: DuplicateRecordFields
+                      , NoFieldSelectors
                       , NoImplicitPrelude
                       , OverloadedRecordDot
                       , UnicodeSyntax
