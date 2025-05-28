@@ -3,7 +3,7 @@ module SOM.Renderer (Draw (..), ProgramList (..), Renderer, create, draw, loadAn
 import SOM.Prelude
 
 import SOM.Animation (Skin (..))
-import SOM.Binary.Animated qualified as Animated (Joint (..), Model (..))
+import SOM.Binary.Animated qualified as Animated (Model (..))
 import SOM.Binary.Piece qualified as Piece (Model (..))
 import SOM.Game (Game (..))
 import SOM.Map (Piece (..), pieces)

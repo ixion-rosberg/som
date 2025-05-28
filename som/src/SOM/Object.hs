@@ -3,7 +3,7 @@ module SOM.Object (Object (..), chest) where
 import SOM.Prelude
 
 import SOM.Animation (Skin (..), animate)
-import SOM.Binary.Animated (Animation, Joint (..), Model (..))
+import SOM.Binary.Animated (Animation)
 
 import SOM.Renderer.Draw (Draw)
 
