@@ -8,6 +8,7 @@ import SOM.Binary.Animated
   , Joint (..)
   , Keyframe (..)
   , Model (..)
+  , Transformation (..)
   , Vertex (..)
   )
 import SOM.CLI (Options (..), handlers, outputOrExtension, parser)
@@ -15,6 +16,7 @@ import SOM.GlTF
   ( Accessor (..)
   , AnimationSampler (..)
   , AnimationSamplers (..)
+  , Buffers
   , GlTF (..)
   , Mesh (..)
   , Skin (..)
@@ -26,21 +28,18 @@ import SOM.GlTF qualified as G (Animation (..))
 
 import Codec.GlTF (fromFile)
 
-import Data.Binary (encodeFile)
+import Data.Binary (Binary, encodeFile)
 import Data.Binary.Extra (IEEE (..), UnsignedShort (..))
 import Data.Coerce (coerce)
 import Data.Either.Extra (mapLeft, maybeToEither)
-import Data.Maybe (listToMaybe)
 import Data.List (zipWith5)
-import Data.List qualified as L (transpose)
+import Data.List.NonEmpty (NonEmpty, nonEmpty)
 import Data.Vector (toList, (!?))
 
-import Linear.Matrix (mkTransformation, (!*!))
 import Linear.Matrix qualified as M (transpose)
 import Linear.Quaternion (Quaternion (..))
 import Linear.V3 (V3 (..))
 import Linear.V4 (V4 (..))
-import Linear.Vector (scaled)
 
 import Options.Applicative (execParser, fullDesc, info)
 
@@ -92,30 +91,28 @@ main = (flip catches) handlers do
 
     bounds m = Bounds (coerce m.position.min) (coerce m.position.max)
 
-    animation b g = do
-      a ←  maybeToEither "Missing animation" (g.animations !? 0)
-      ks ← keyframes b (toList a.samplers)
+    animation b g = Animation
+      <$> (transformations b =≪ maybeToEither "Missing animation" (g.animations !? 0))
 
-      pure (Animation ks)
+    transformations b = mapM (transformation b) ∘ toList ∘ (.samplers)
 
-    keyframes b ss = zipWith Keyframe
-      <$> (first =≪ mapM (times b) ss)
-      <*> (L.transpose <$> mapM (transformations b) ss)
+    transformation b ss = Transformation
+      <$> keyframes coerce b ss.translation
+      <*> keyframes rotation b ss.rotation
+      <*> keyframes coerce b ss.scale
 
-    first = maybeToEither "Missing times" ∘ listToMaybe
+    keyframes ∷ Binary α ⇒ (α → β) → Buffers → AnimationSampler α → Either String (NonEmpty (Keyframe β))
+    keyframes f b s = do
+      ts ← access b s.input
+      xs ← access b s.output
 
-    times b s = intervals <$> access b s.translation.input
+      nonEmptyList (zipWith Keyframe (intervals ts) (f <$> xs))
+
+    nonEmptyList = maybeToEither "Missing keyframes" ∘ nonEmpty
+
     intervals = intervals' 0 ∘ fmap (realToFrac ∘ (.unIEEE))
-    intervals' _  []     = []
-    intervals' t₀ (t:ts) = (t - t₀) : (intervals' t ts)
+    intervals' t₀ = \ case
+      []     → []
+      t : ts → (t - t₀) : (intervals' t ts)
 
-    transformations b s = zipWith3 transformation
-      <$> access b s.translation.output
-      <*> access b s.rotation.output
-      <*> access b s.scale.output
-
-    transformation t r s = mkTransformation r' t' !*! s'
-      where
-        t' = coerce t
-        r' = case coerce r of (V4 x y z w) → Quaternion w (V3 x y z)
-        s' = case coerce s of (V3 x y z) → scaled (V4 x y z 1)
+    rotation = (\ (V4 x y z w) → Quaternion w (V3 x y z)) ∘ coerce
