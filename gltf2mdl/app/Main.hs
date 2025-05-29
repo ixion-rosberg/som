@@ -18,6 +18,7 @@ import SOM.GlTF
   , AnimationSamplers (..)
   , Buffers
   , GlTF (..)
+  , Image (..)
   , Mesh (..)
   , Skin (..)
   , access
@@ -67,6 +68,7 @@ main = (flip catches) handlers do
       <*> indices b g.mesh
       <*> joints b g
       <*> pure (bounds g.mesh)
+      <*> pure (g.image.name <> ".txr")
       <*> animation b g
 
     vertices b m = zipWith5 vertex
