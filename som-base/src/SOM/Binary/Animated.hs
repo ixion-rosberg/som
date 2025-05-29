@@ -28,6 +28,7 @@ data Model = Model { vertices  ∷ [Vertex]
                    , indices   ∷ [Word16]
                    , joints    ∷ [Joint]
                    , bounds    ∷ Bounds
+                   , texture   ∷ FilePath
                    , animation ∷ Animation
                    } deriving Generic
 

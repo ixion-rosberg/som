@@ -22,6 +22,7 @@ import Linear.V3 (V3)
 
 data Model = Model { vertices ∷ [Vertex]
                    , indices  ∷ [Word16]
+                   , texture  ∷ FilePath
                    } deriving Generic
 
 instance Binary Model
