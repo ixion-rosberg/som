@@ -4,6 +4,7 @@ import SOM.Prelude
 
 import SOM.Animation (Skin (..))
 import SOM.Binary.Animated (Joint (..), Model (..))
+import SOM.Binary.Piece (Model (..))
 import SOM.Controller (ButtonName (..), controller)
 import SOM.Game (Game, game)
 import SOM.Map (Orientation (..), PieceSetup (..))
@@ -59,9 +60,9 @@ main = do
           ]
 
         loadMap r = do
-          f ← createPieceSetup r "som/bin/floor.msm" "som/bin/floor.mhm" "som/bin/set.txr"
-          w ← createPieceSetup r "som/bin/wall.msm" "som/bin/wall.mhm" "som/bin/set.txr"
-          c ← createPieceSetup r "som/bin/corner.msm" "som/bin/corner.mhm" "som/bin/set.txr"
+          f ← createPieceSetup r "floor.msm" "floor.mhm"
+          w ← createPieceSetup r "wall.msm" "wall.mhm"
+          c ← createPieceSetup r "corner.msm" "corner.mhm"
 
           pure $ Map.create [ c 0 0 East
                             , w 0 1 South
@@ -91,29 +92,31 @@ main = do
                             ]
 
 
-        createPieceSetup r fm fc ft = do
-          m ← decodeFile fm
-          c ← decodeFile fc
-          t ← Texture.load ft
+        createPieceSetup r fm fc = do
+          m ← decodeFile (binDir <> fm)
+          c ← decodeFile (binDir <> fc)
+          t ← Texture.load (binDir <> m.texture)
 
           d ← loadPiece r m t
 
           pure (PieceSetup d c)
 
         loadObjects r = do
-          c ← loadChest r "som/bin/chest.mdl" "som/bin/chest.txr"
+          c ← loadChest r "chest.mdl"
 
           pure [ c (V3 6 0.01 -6) ]
 
 
-        loadChest r fm ft = do
-          m ← decodeFile fm
-          t ← Texture.load ft
+        loadChest r f = do
+          m ← decodeFile (binDir <> f)
+          t ← Texture.load (binDir <> m.texture)
           d ← loadAnimated r m t
 
           pure $ chest (skin m) m.animation d
 
         skin m = Skin ((.transformation) <$> m.joints) ((.inverseBindMatrix) <$> m.joints)
+
+        binDir = "som/bin/"
 
 
 
