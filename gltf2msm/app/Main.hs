@@ -3,7 +3,7 @@ module Main where
 import SOM.Prelude
 
 import SOM.Binary.Piece (Model (..), Vertex (..))
-import SOM.GlTF (Accessor (..), GlTF (..), Mesh (..), access, loadBuffers, parse)
+import SOM.GlTF (Accessor (..), GlTF (..), Image (..), Mesh (..), access, loadBuffers, parse)
 import SOM.CLI (Options (..), handlers, outputOrExtension, parser)
 
 import Codec.GlTF (fromFile)
@@ -33,10 +33,11 @@ main = (flip catches) handlers do
   ts ← lift $ access b g.mesh.texCoord
   is ← lift $ access b g.mesh.indices
 
-  let vs = zipWith3 vertex ps ns ts
+  let vs  = zipWith3 vertex ps ns ts
       is' = (.unUnsignedShort) <$> is
+      t   = g.image.name <> ".txr"
 
-  encodeFile (outputOrExtension "msm" o) (Model vs is')
+  encodeFile (outputOrExtension "msm" o) (Model vs is' t)
   where
     lift = fromEither ∘ mapLeft stringException
     vertex p n t = Vertex ((.unIEEE) <$> p) ((.unIEEE) <$> n) ((.unIEEE) <$> t)
