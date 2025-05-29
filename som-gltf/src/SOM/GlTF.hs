@@ -6,6 +6,7 @@ module SOM.GlTF
   , Buffers
   , BufferView (..)
   , GlTF (..)
+  , Image (..)
   , Mesh (..)
   , Skin (..)
   , access
@@ -31,6 +32,7 @@ import Codec.GlTF.Animation qualified as Unparsed
   )
 import Codec.GlTF.Buffer qualified as Unparsed (Buffer (..), BufferIx (..))
 import Codec.GlTF.BufferView qualified as Unparsed (BufferView (..), BufferViewIx (..))
+import Codec.GlTF.Image qualified as Unparsed (Image (..))
 import Codec.GlTF.Mesh qualified as Unparsed (Mesh (..), MeshPrimitive (..))
 import Codec.GlTF.Node (Node (..), NodeIx (..))
 import Codec.GlTF.Node qualified as Unparsed (Skin (..))
@@ -43,7 +45,7 @@ import Data.ByteString qualified as B (drop, take)
 import Data.Either.Extra (mapLeft, maybeToEither)
 import Data.HashMap.Strict (lookup)
 import Data.Maybe (fromMaybe)
-import Data.Text (Text)
+import Data.Text (Text, unpack)
 import Data.Vector (Vector, find, toList, (!?))
 import Data.Vector qualified as V (filter)
 import Data.Word (Word8)
@@ -57,10 +59,11 @@ import Linear.Vector (scaled)
 
 import UnliftIO.Exception (fromEither, stringException)
 
-data GlTF = GlTF { buffers     ∷ Vector URI
-                 , mesh        ∷ Mesh
-                 , skin        ∷ Maybe Skin
-                 , animations  ∷ Vector Animation
+data GlTF = GlTF { buffers    ∷ Vector URI
+                 , mesh       ∷ Mesh
+                 , image      ∷ Image
+                 , skin       ∷ Maybe Skin
+                 , animations ∷ Vector Animation
                  }
 
 data Mesh = Mesh { position ∷ Accessor (V3 IEEE)
@@ -73,9 +76,9 @@ data Mesh = Mesh { position ∷ Accessor (V3 IEEE)
 
 data Accessor α = Accessor { bufferView ∷ BufferView α, min ∷ α, max ∷ α }
 
-type Buffers = Vector ByteString
-
 data BufferView α = BufferView { buffer ∷ Int, length ∷ Int, offset ∷ Int }
+
+newtype Image = Image { name ∷ String }
 
 data Skin = Skin { joints ∷ Vector (M44 Float), inverseBindMatrices ∷ BufferView (M44 IEEE) }
 
@@ -88,20 +91,24 @@ data AnimationSamplers = AnimationSamplers { translation ∷ AnimationSampler (V
 
 data AnimationSampler α = AnimationSampler { input ∷ BufferView IEEE, output ∷ BufferView α }
 
+type Buffers = Vector ByteString
+
 parse ∷ Unparsed.GlTF → Either String GlTF
 parse g = do
   vs ← bufferViews
   as ← accessors
   bs ← buffers
   m ← mesh as vs
+  i ← image
 
-  pure (GlTF bs m (skin as vs) (animations as vs))
+  pure (GlTF bs m i (skin as vs) (animations as vs))
 
   where
     buffers = maybeToEither "Missing buffers" $ mapM (.uri) =≪ g.buffers
     bufferViews = maybeToEither "Missing buffer views" g.bufferViews
     accessors = maybeToEither "Missing accessors" g.accessors
-    mesh as vs = maybeToEither "Missing mesh" ∘ (parseMesh as vs ↢ (!? 0) ∘ (.primitives) ↢ (!? 0) ↢ (.meshes)) $ g
+    mesh as vs = (maybeToEither "Missing mesh" ∘ (parseMesh as vs ↢ findMesh)) g
+    findMesh = (!? 0) ∘ (.primitives) ↢ (!? 0) ↢ (.meshes)
     parseMesh as vs m = Mesh
       <$> (accessor v3  =≪ attribute "POSITION")
       <*> (bufferView vs =≪ attribute "NORMAL")
@@ -120,6 +127,10 @@ parse g = do
         v3 = toList ⋙ \ case
           [x, y, z] → (Just ∘ fmap (IEEE ∘ realToFrac)) (V3 x y z)
           _         → Nothing
+
+    image = (maybeToEither "Missing image" ∘ (parseImage ↢ findImage)) g
+    findImage = (!? 0) ↢ (.images)
+    parseImage = fmap (Image ∘ unpack) ∘ (.name)
 
     skin as vs = do
       s ← (!? 0) =≪ g.skins
