@@ -43,12 +43,14 @@ library
                    , SOM.Collision
                    , SOM.Controller
                    , SOM.Game
+                   , SOM.Gauge
                    , SOM.IdentityList
                    , SOM.Map
                    , SOM.Object
                    , SOM.Objects
                    , SOM.Player
                    , SOM.Player.Movement
+                   , SOM.Player.Power
                    , SOM.Renderer
                    , SOM.Renderer.Draw
                    , SOM.Renderer.Program
@@ -63,6 +65,7 @@ library
                    , Data.Vector.Storable.Lifted
                    , Foreign.Extra
                    , Foreign.Lifted
+                   , FRP.Yampa.Extra
                    , Graphics.UI.GLFW.Lifted
                    , Linear.Metric.Unicode
                    , Linear.V3.Unicode

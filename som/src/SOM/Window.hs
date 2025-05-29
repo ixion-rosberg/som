@@ -24,7 +24,7 @@ import Graphics.UI.GLFW.Lifted
 import UnliftIO.Exception (fromEither, stringException, throwString)
 import UnliftIO.IORef (IORef, modifyIORef, newIORef, readIORef, writeIORef)
 
-type Dimensions = (Int, Int)
+type Dimensions = (ℕ, ℕ)
 
 data Window = Window GLFW.Window (IORef Inputs)
 
@@ -38,7 +38,7 @@ create t (w, h) = do
 
   mapM_ windowHint hints
 
-  win ← fromEither ∘ explain =≪ createWindow w h t Nothing Nothing
+  win ← fromEither ∘ explain =≪ createWindow (fromIntegral w) (fromIntegral h) t Nothing Nothing
 
   makeContextCurrent (Just win)
 

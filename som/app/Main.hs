@@ -10,10 +10,11 @@ import SOM.Game (Game, game)
 import SOM.Map (Orientation (..), PieceSetup (..))
 import SOM.Map qualified as Map (create)
 import SOM.Object (chest)
+import SOM.Viewport (Viewport)
 import SOM.Viewport qualified as Viewport (create)
 import SOM.Window (Window, shouldClose, update, inputs)
 import SOM.Window qualified as Window (create)
-import SOM.Renderer (ProgramList (..), Renderer, draw, loadAnimated, loadPiece)
+import SOM.Renderer (ProgramList (..), Renderer, draw, loadAnimated, loadGauge, loadPiece)
 import SOM.Renderer qualified as Renderer (create)
 import SOM.Renderer.Program (ShaderType (..))
 import SOM.Renderer.Texture qualified as Texture (load)
@@ -29,6 +30,7 @@ import FRP.Yampa (Event (..), maybeToEvent, reactimate)
 
 import Graphics.UI.GLFW (Key (..), KeyState (..))
 
+import Linear.V2 (V2 (..))
 import Linear.V3 (V3 (..))
 
 import UnliftIO (MonadUnliftIO)
@@ -38,13 +40,14 @@ main ∷ IO ()
 main = do
   w ← Window.create "Sword of Moonλight" (width, height)
   v ← Viewport.create width height
-  r ← Renderer.create v sources
+  r ← Renderer.create sources
   t ← newIORef =≪ getCurrentTime
 
+  g ← loadPowerGauge r
   m ← loadMap r
   os ← loadObjects r
 
-  reactimate (pure init) (sense w t) (actuate w r) (controller ⋙ game m os p₀)
+  reactimate (pure init) (sense w t) (actuate w v r) (controller ⋙ game g m os p₀)
 
   where width  = 800
         height = 600
@@ -58,6 +61,13 @@ main = do
           [ (Vertex,   "som/shaders/animated.vert")
           , (Fragment, "som/shaders/animated.frag")
           ]
+          [ (Vertex,   "som/shaders/gauge.vert")
+          , (Fragment, "som/shaders/gauge.frag")
+          ]
+
+        loadPowerGauge r = do
+          t ← Texture.load (binDir <> "gauge.txr")
+          loadGauge r t (V2 20 20) (V2 240 16)
 
         loadMap r = do
           f ← createPieceSetup r "floor.msm" "floor.mhm"
@@ -135,8 +145,8 @@ sense w r _ = do
 
   pure (δt, Just i)
 
-actuate ∷ MonadUnliftIO μ ⇒ Window → Renderer → Bool → Game → μ Bool
-actuate w r _ g = draw r g *> shouldClose w
+actuate ∷ MonadUnliftIO μ ⇒ Window → Viewport → Renderer → Bool → Game → μ Bool
+actuate w v r _ g = draw v r g *> shouldClose w
 
 keyMap ∷ Map Key KeyState → ButtonName → Event Bool
 keyMap ks b = maybeToEvent $ find =≪ case b of

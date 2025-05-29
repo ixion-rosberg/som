@@ -1,4 +1,4 @@
-module SOM.Player.Movement (Movement (..), acceleration, headBobbing, movement) where
+module SOM.Player.Movement (Movement (..), Speed (..), acceleration, headBobbing, movement) where
 
 import SOM.Prelude
 

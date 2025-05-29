@@ -7,6 +7,7 @@ import SOM.Controller (Button (..), Controller (..), Dpad (..))
 import SOM.Map (Map, collisionShapes)
 import SOM.Normal (Normal (..))
 import SOM.Player.Movement (acceleration, headBobbing, movement)
+import SOM.Player.Power (power)
 
 import Control.Arrow (returnA)
 
@@ -21,7 +22,7 @@ import Linear.V3 (V3 (..))
 import Linear.V3.Unicode qualified as V3 ((×))
 import Linear.Vector.Extra qualified as V (integral)
 
-data Player = Player { view ∷ M44 Float }
+data Player = Player { view ∷ M44 Float, power ∷ Float }
 
 player ∷ Map → V3 Float → SF Controller Player
 player ma p₀ = proc c → do
@@ -42,9 +43,9 @@ player ma p₀ = proc c → do
         cs = (b ╳) =≪ collisionShapes ma
  
   h ← headBobbing ⤙ mo
+  po ← power ⤙ mo
 
-
-  returnA ⤙ Player (view p h (l × t))
+  returnA ⤙ Player (view p h (l × t)) po
 
   where
     view p h r = lookAt (ph + h) (ph + dir) up
