@@ -11,7 +11,10 @@ import SOM.Player.Power (power)
 
 import Control.Arrow (returnA)
 
-import FRP.Yampa (SF, integral)
+import Data.Monoid (Sum (..))
+import Data.Monoid.Extra (mwhen)
+
+import FRP.Yampa (SF, edgeTag, integral, rSwitch)
 
 import Linear.Matrix (M44)
 import Linear.Metric (project)
@@ -31,7 +34,8 @@ player ma p₀ = proc c → do
   t ← axisAngle up ^≪ integral ⤙ turn c
 
   rec
-    θl ← integral ⤙ look θl c
+    center ← edgeTag integral ⤙ c.l2.held ∧ c.r2.held
+    θl ← rSwitch integral ⤙ (look θl c, center)
 
   let l = axisAngle ((rotate t forward) V3.× up) θl
 
@@ -49,20 +53,19 @@ player ma p₀ = proc c → do
 
   where
     view p h r = lookAt (ph + h) (ph + dir) up
-      where ph = p + V3 0 1.8 0
+      where ph  = p + V3 0 1.8 0
             dir = rotate r forward
 
-    turn c = case (c.dpad.left.held, c.dpad.right.held) of
-      (True , False) →  0.6
-      (False, True ) → -0.6
-      _              →  0.0
+    turn c = getSum (turnLeft <> turnRight)
+      where
+        turnLeft  = mwhen c.dpad.left.held  (Sum  0.6)
+        turnRight = mwhen c.dpad.right.held (Sum -0.6)
 
-    look θ c = case (c.l2.held, c.r2.held) of
-      (True , False) | θ < θmax →  0.6
-      (False, True ) | θ > θmin → -0.6
-      _                         →  0.0
-      where θmax = π ÷ 4
-            θmin = -θmax
+    look θ c = getSum (lookUp <> lookDown)
+      where
+        lookUp   = mwhen (c.l2.held ∧ θ <  θmax) (Sum  0.7)
+        lookDown = mwhen (c.r2.held ∧ θ > -θmax) (Sum -0.7)
+        θmax     = π ÷ 4
 
     resolveCollisions cs v = foldr resolve v ((.normal) <$> cs)
       where resolve n x = if n.unNormal ⋅ x < 0

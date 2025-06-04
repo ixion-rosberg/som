@@ -8,6 +8,8 @@ import Control.Arrow (returnA)
 import Control.Monad (guard)
 
 import Data.Fixed (mod')
+import Data.Monoid (Sum (..))
+import Data.Monoid.Extra (mwhen)
 
 import FRP.Yampa (SF, edge, edgeBy, edgeJust, gate, lMerge, switch, time)
 
@@ -33,10 +35,7 @@ movement c = case (V2 strafe walk) of
     strafe = direction c.r1 c.l1
     speed  = if c.circle.held then Dash else Normal
 
-    direction pos neg = case (pos.held, neg.held) of
-      (True , False) →  1
-      (False, True ) → -1
-      _              →  0
+    direction bp bn = getSum (mwhen bp.held (Sum 1) <> mwhen bn.held (Sum -1))
 
 acceleration ∷ Velocity → Movement → Acceleration
 acceleration current m = 6.0 *^ (desired - current)
