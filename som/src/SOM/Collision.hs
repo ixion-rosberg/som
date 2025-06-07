@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wno-type-defaults #-}
 
-module SOM.Collision (BoundingSphere (..), Collision (..), (╳)) where
+module SOM.Collision (BoundingBox (..), BoundingSphere (..), Collision (..), Ray (..), (╳)) where
 
 import SOM.Prelude
 
@@ -21,11 +21,29 @@ import Linear.V3 (V3 (..))
 import Linear.V3.Unicode qualified as V3 ((×))
 import Linear.Vector ((*^))
 
+data BoundingSphere = BoundingSphere { center ∷ V3 Float
+                                     , radius ∷ Float
+                                     }
 
-data BoundingSphere = BoundingSphere { center ∷ V3 Float, radius ∷ Float }
-data Collision = Collision { point ∷ V3 Float, normal ∷ Normal Float }
-data Plane = Plane { normal ∷ V3 Float, distance ∷ Float }
-data Line = Line { a ∷ V3 Float, b ∷ V3 Float }
+data BoundingBox = BoundingBox { min ∷ V3 Float
+                               , max ∷ V3 Float
+                               }
+
+data Collision = Collision { point  ∷ V3 Float
+                           , normal ∷ Normal Float
+                           }
+
+data Plane = Plane { normal   ∷ V3 Float
+                   , distance ∷ Float
+                   }
+
+data Line = Line { a ∷ V3 Float
+                 , b ∷ V3 Float
+                 }
+
+data Ray = Ray { origin    ∷ V3 Float
+               , direction ∷ V3 Float
+               }
 
 class α ╳ β where
   type Result α β
@@ -43,6 +61,15 @@ instance BoundingSphere ╳ Face where
     where
       intersecting = distance p s.center ^ 2 < s.radius ^ 2
       p = closestPoint s.center f.triangle
+
+instance Ray ╳ BoundingBox where
+  type Result Ray BoundingBox = Bool
+
+  r ╳ b = maximum tmin ≤ minimum tmax
+    where t₁   = (b.min - r.origin) ÷ r.direction
+          t₂   = (b.max - r.origin) ÷ r.direction
+          tmin = min <$> t₁ <*> t₂
+          tmax = max <$> t₁ <*> t₂
 
 plane ∷ Triangle → Plane
 plane t = Plane normal (normal ⋅ t.a)
