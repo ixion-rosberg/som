@@ -4,8 +4,7 @@ import SOM.Prelude
 
 import SOM.Collision (Ray (..))
 import SOM.Controller (Button (..), Controller (..))
-import SOM.Directions (pattern FORWARD, pattern RIGHT, pattern UP)
-import SOM.Normal (pattern N3)
+import SOM.Direction (Direction (..), pattern D3, pattern FORWARD, pattern RIGHT, pattern UP)
 import SOM.Player.Movement (Movement (..), Speed (..))
 import SOM.Transform (transform)
 
@@ -42,7 +41,7 @@ head = proc i → do
         center ← edgeTag integral ⤙ c.l2.held ∧ c.r2.held
         θ      ← rSwitch integral ⤙ (look θ c, center)
 
-      returnA ⤙ axisAngle RIGHT θ
+      returnA ⤙ axisAngle (RIGHT).unDirection θ
 
     look θ c = getSum (lookUp <> lookDown)
       where
@@ -52,9 +51,9 @@ head = proc i → do
 
     transformation t₀ o = t₀ !*! mkTransformation o (V3 0 1.8 0)
 
-    view t p = lookAt (transform t p) (transform t FORWARD) UP
+    view t p = lookAt (transform t p) (transform t (FORWARD).unDirection) (UP).unDirection
 
-    lineOfSight t = Ray (transform t (V3 0 0 0)) (transform t (N3 0 0 -1))
+    lineOfSight t = Ray (transform t (V3 0 0 0)) (transform t (D3 0 0 -1))
 
 
 headBobbing ∷ SF Movement (V3 Float)

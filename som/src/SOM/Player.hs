@@ -4,9 +4,8 @@ import SOM.Prelude
 
 import SOM.Collision (BoundingSphere (..), Collision (..), (╳))
 import SOM.Controller (Button (..), Controller (..), Dpad (..))
-import SOM.Directions (pattern UP)
+import SOM.Direction (Direction (..), pattern UP)
 import SOM.Map (Map, collisionShapes)
-import SOM.Normal (Normal (..))
 import SOM.Player.Head (Head, head)
 import SOM.Player.Head qualified as Head (Input (..))
 import SOM.Player.Movement (acceleration, movement)
@@ -32,7 +31,7 @@ player ∷ Map → V3 Float → SF Controller Player
 player ma p₀ = proc c → do
   let mo = movement c
 
-  t ← axisAngle UP ^≪ integral ⤙ turn c
+  t ← axisAngle (UP).unDirection ^≪ integral ⤙ turn c
 
   rec
     v ← V.integral            ⤙ acceleration v mo
@@ -50,8 +49,8 @@ player ma p₀ = proc c → do
         turnRight = mwhen c.dpad.right.held (Sum -0.6)
 
     resolveCollisions p v = foldr resolve v ((.normal) <$> cs)
-      where resolve n x = if n.unNormal ⋅ x < 0
-              then x - project n.unNormal x
+      where resolve n x = if n.unDirection ⋅ x < 0
+              then x - project n.unDirection x
               else x
 
             cs = (b ╳) =≪ collisionShapes ma

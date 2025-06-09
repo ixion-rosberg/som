@@ -3,7 +3,7 @@ module SOM.Transform (Transform (..)) where
 import SOM.Prelude
 
 import SOM.Binary.Piece (CollisionShape (..), Face (..), Triangle (..))
-import SOM.Normal (Normal (..))
+import SOM.Direction (Direction (..))
 
 import Control.Lens (view)
 
@@ -23,7 +23,7 @@ instance Transform (V3 Float) where
 instance Transform Face where
   transform m f = Face (transform m f.normal) (transform m f.triangle)
 
-instance Transform (Normal Float) where
+instance Transform (Direction Float) where
   transform m n = m' !* n
     where m' = (coerce ∘ view _m33 ∘ transpose ∘ inv44) m
 
