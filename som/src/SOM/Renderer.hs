@@ -10,6 +10,7 @@ import SOM.Map (Piece (..), pieces)
 import SOM.Object (Object (..))
 import SOM.Player (Player (..))
 import SOM.Renderer.Draw (Draw (..))
+import SOM.Player.Head (Head (..))
 import SOM.Renderer.Program (Program, Source, enable)
 import SOM.Renderer.Program qualified as Program (create)
 import SOM.Renderer.Texture (Texture, bind)
@@ -43,12 +44,12 @@ draw v r g = do
   enableDepthTest v
 
   enable r.programs.piece
-  setUniform r.programs.piece "view" g.player.view
+  setUniform r.programs.piece "view" g.player.head.view
   setUniform r.programs.piece "projection" (perspective v)
   drawMap g.map
 
   enable r.programs.animated
-  setUniform r.programs.animated "view" g.player.view
+  setUniform r.programs.animated "view" g.player.head.view
   setUniform r.programs.animated "projection" (perspective v)
   drawObjects g.objects
 

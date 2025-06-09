@@ -37,7 +37,7 @@ perspective (Viewport w h) = Projection.perspective fov aspect near far
   where fov    = 45 × π ÷ 180
         aspect = fromIntegral w ÷ fromIntegral h
         near   = 0.1
-        far    = 10
+        far    = 20
 
 orthographic ∷ Viewport → M44 Float
 orthographic (Viewport w h) = Projection.ortho 0 (fromIntegral w) (fromIntegral h) 0 -1 1
