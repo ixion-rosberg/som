@@ -122,7 +122,7 @@ main = do
           t ← Texture.load (binDir <> m.texture)
           d ← loadAnimated r m t
 
-          pure $ chest (skin m) m.animation d
+          pure $ chest m.bounds (skin m) m.animation d
 
         skin m = Skin ((.transformation) <$> m.joints) ((.inverseBindMatrix) <$> m.joints)
 

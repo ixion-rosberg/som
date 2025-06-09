@@ -17,7 +17,7 @@ import Control.Arrow (returnA)
 import Data.Monoid (Sum (..))
 import Data.Monoid.Extra (mwhen)
 
-import FRP.Yampa (SF, integral)
+import FRP.Yampa (Event, SF, integral)
 
 import Linear.Matrix (mkTransformation)
 import Linear.Metric (project)
@@ -26,7 +26,7 @@ import Linear.Quaternion (axisAngle, rotate)
 import Linear.V3 (V3 (..))
 import Linear.Vector.Extra qualified as V (integral)
 
-data Player = Player { head ∷ Head, power ∷ Float }
+data Player = Player { position ∷ V3 Float, head ∷ Head, power ∷ Float, interact ∷ Event () }
 
 player ∷ Map → V3 Float → SF Controller Player
 player ma p₀ = proc c → do
@@ -41,7 +41,7 @@ player ma p₀ = proc c → do
   h  ← head  ⤙ Head.Input c mo (mkTransformation t p)
   po ← power ⤙ mo
 
-  returnA ⤙ Player h po
+  returnA ⤙ Player p h po c.circle.pressed
 
   where
     turn c = getSum (turnLeft <> turnRight)

@@ -2,8 +2,10 @@ module SOM.Player.Head where
 
 import SOM.Prelude
 
+import SOM.Collision (Ray (..))
 import SOM.Controller (Button (..), Controller (..))
 import SOM.Directions (pattern FORWARD, pattern RIGHT, pattern UP)
+import SOM.Normal (pattern N3)
 import SOM.Player.Movement (Movement (..), Speed (..))
 import SOM.Transform (transform)
 
@@ -23,7 +25,7 @@ import Linear.V3 (V3 (..))
 
 data Input = Input { controller ∷ Controller, movement ∷ Movement, playerTransformation ∷ M44 Float }
 
-data Head = Head { view ∷ M44 Float }
+data Head = Head { view ∷ M44 Float, lineOfSight ∷ Ray }
 
 head ∷ SF Input Head
 head = proc i → do
@@ -32,7 +34,7 @@ head = proc i → do
 
   let t = transformation i.playerTransformation o
 
-  returnA ⤙ (Head (view t h))
+  returnA ⤙ (Head (view t h) (lineOfSight t))
 
   where
     orientation = proc c → do
@@ -51,6 +53,8 @@ head = proc i → do
     transformation t₀ o = t₀ !*! mkTransformation o (V3 0 1.8 0)
 
     view t p = lookAt (transform t p) (transform t FORWARD) UP
+
+    lineOfSight t = Ray (transform t (V3 0 0 0)) (transform t (N3 0 0 -1))
 
 
 headBobbing ∷ SF Movement (V3 Float)

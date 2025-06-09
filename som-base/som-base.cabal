@@ -12,6 +12,7 @@ library
                       , NoFieldSelectors
                       , NoImplicitPrelude
                       , OverloadedRecordDot
+                      , PatternSynonyms
                       , UnicodeSyntax
     exposed-modules:    SOM.Prelude
                       , SOM.Binary.Animated

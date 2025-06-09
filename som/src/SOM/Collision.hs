@@ -5,7 +5,7 @@ module SOM.Collision (BoundingBox (..), BoundingSphere (..), Collision (..), Ray
 import SOM.Prelude
 
 import SOM.Binary.Piece (CollisionShape (..), Face (..), Triangle (..))
-import SOM.Normal (Normal)
+import SOM.Normal (Normal (..))
 
 import Control.Monad (guard)
 
@@ -42,7 +42,7 @@ data Line = Line { a ∷ V3 Float
                  }
 
 data Ray = Ray { origin    ∷ V3 Float
-               , direction ∷ V3 Float
+               , direction ∷ Normal Float
                }
 
 class α ╳ β where
@@ -66,8 +66,8 @@ instance Ray ╳ BoundingBox where
   type Result Ray BoundingBox = Bool
 
   r ╳ b = maximum tmin ≤ minimum tmax
-    where t₁   = (b.min - r.origin) ÷ r.direction
-          t₂   = (b.max - r.origin) ÷ r.direction
+    where t₁   = (b.min - r.origin) ÷ r.direction.unNormal
+          t₂   = (b.max - r.origin) ÷ r.direction.unNormal
           tmin = min <$> t₁ <*> t₂
           tmax = max <$> t₁ <*> t₂
 
