@@ -11,6 +11,7 @@ library
     default-extensions: DuplicateRecordFields
                       , NoFieldSelectors
                       , NoImplicitPrelude
+                      , LexicalNegation
                       , OverloadedRecordDot
                       , PatternSynonyms
                       , UnicodeSyntax
@@ -19,8 +20,8 @@ library
                       , SOM.Binary.Piece
                       , SOM.Binary.Texture
                       , SOM.CLI
+                      , SOM.Direction
                       , Data.Binary.Extra
-                      , SOM.Normal
     build-depends:      base ^>=4.20.0.0
                       , base-unicode-symbols
                       , binary
