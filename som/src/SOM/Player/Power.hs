@@ -6,7 +6,7 @@ import SOM.Player.Movement (Movement (..), Speed (..))
 
 import Control.Arrow (arr, returnA, (&&&))
 
-import FRP.Yampa (SF, after, edgeTag, drSwitch, switch)
+import FRP.Yampa (SF, edge, edgeTag, drSwitch, switch)
 import FRP.Yampa.Extra (clampedIntegral)
 
 type Power = Float
@@ -28,5 +28,6 @@ power = proc m → do
       Moving Normal _ →  30
       Moving Dash   _ → -60
 
-    regular  = (pmax +) ^≪ clampedIntegral (-pmax, 0)
-    depleted = switch (arr (const 0) &&& after 2 ()) (const (clampedIntegral (0, pmax)))
+    regular   = (pmax +) ^≪ clampedIntegral (-pmax, 0)
+    depleted  = switch (arr (const 0) &&& recovered) (const (clampedIntegral (0, pmax)))
+    recovered = edge ⋘ (≡ (pmax ÷ 2)) ^≪ clampedIntegral (0, pmax ÷ 2)
