@@ -2,22 +2,22 @@ module Main where
 
 import SOM.Prelude
 
-import SOM.Animation (Skin (..))
 import SOM.Binary.Animated (Joint (..), Model (..))
 import SOM.Binary.Piece (Model (..))
 import SOM.Controller (ButtonName (..), controller)
 import SOM.Game (Game, game)
-import SOM.Map (Orientation (..), PieceSetup (..))
-import SOM.Map qualified as Map (create)
-import SOM.Object (chest)
-import SOM.Viewport (Viewport)
-import SOM.Viewport qualified as Viewport (create)
-import SOM.Window (Window, shouldClose, update, inputs)
-import SOM.Window qualified as Window (create)
+import SOM.Game.Animation (Skin (..))
+import SOM.Game.Map (Orientation (..), PieceSetup (..))
+import SOM.Game.Map qualified as Map (create)
+import SOM.Game.Object (chest)
 import SOM.Renderer (ProgramList (..), Renderer, draw, loadAnimated, loadGauge, loadPiece)
 import SOM.Renderer qualified as Renderer (create)
 import SOM.Renderer.Program (ShaderType (..))
 import SOM.Renderer.Texture qualified as Texture (load)
+import SOM.Viewport (Viewport)
+import SOM.Viewport qualified as Viewport (create)
+import SOM.Window (Window, shouldClose, update, inputs)
+import SOM.Window qualified as Window (create)
 
 import Control.Monad.IO.Class (MonadIO)
 

@@ -1,12 +1,12 @@
-module SOM.Object (Input (..), Object (..), chest) where
+module SOM.Game.Object (Input (..), Object (..), chest) where
 
 import SOM.Prelude
 
-import SOM.Animation (Skin (..), animate)
 import SOM.Binary.Animated (Animation, Bounds (..))
-import SOM.Collision (BoundingBox (..), (╳))
-import SOM.Player (Player (..))
-import SOM.Player.Head (Head (..))
+import SOM.Game.Animation (Skin (..), animate)
+import SOM.Game.Collision (BoundingBox (..), (╳))
+import SOM.Game.Player (Player (..))
+import SOM.Game.Player.Head (Head (..))
 import SOM.Renderer.Draw (Draw)
 
 import Control.Arrow (arr, returnA, (&&&))

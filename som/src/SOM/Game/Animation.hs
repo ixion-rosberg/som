@@ -1,4 +1,4 @@
-module SOM.Animation (Skin (..), animate) where
+module SOM.Game.Animation (Skin (..), animate) where
 
 import SOM.Prelude
 

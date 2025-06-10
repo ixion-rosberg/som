@@ -3,14 +3,14 @@ module SOM.Game (Game (..), game) where
 import SOM.Prelude
 
 import SOM.Controller (Controller)
-import SOM.Gauge (Gauge)
+import SOM.Game.Gauge (Gauge)
+import SOM.Game.Map (Map)
+import SOM.Game.Object (Object)
+import SOM.Game.Object qualified as Object (Input (..))
+import SOM.Game.Objects (objects)
+import SOM.Game.Player (Player (..), player)
+import SOM.Game.Player.Power (pmax)
 import SOM.IdentityList (IdentityList)
-import SOM.Map (Map)
-import SOM.Object (Object)
-import SOM.Object qualified as Object (Input (..))
-import SOM.Objects (objects)
-import SOM.Player (Player (..), player)
-import SOM.Player.Power (pmax)
 import SOM.Renderer.Draw (Draw)
 
 import Control.Arrow (returnA)

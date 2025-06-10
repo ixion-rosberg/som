@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wno-type-defaults #-}
 
-module SOM.Collision (BoundingBox (..), BoundingSphere (..), Collision (..), Ray (..), (╳)) where
+module SOM.Game.Collision (BoundingBox (..), BoundingSphere (..), Collision (..), Ray (..), (╳)) where
 
 import SOM.Prelude
 

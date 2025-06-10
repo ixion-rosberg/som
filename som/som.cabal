@@ -39,19 +39,19 @@ common shared
 
 library
     import:          shared
-    exposed-modules: SOM.Animation
-                   , SOM.Collision
-                   , SOM.Controller
+    exposed-modules: SOM.Controller
                    , SOM.Game
-                   , SOM.Gauge
+                   , SOM.Game.Animation
+                   , SOM.Game.Collision
+                   , SOM.Game.Gauge
+                   , SOM.Game.Map
+                   , SOM.Game.Object
+                   , SOM.Game.Objects
+                   , SOM.Game.Player
+                   , SOM.Game.Player.Head
+                   , SOM.Game.Player.Movement
+                   , SOM.Game.Player.Power
                    , SOM.IdentityList
-                   , SOM.Map
-                   , SOM.Object
-                   , SOM.Objects
-                   , SOM.Player
-                   , SOM.Player.Head
-                   , SOM.Player.Movement
-                   , SOM.Player.Power
                    , SOM.Renderer
                    , SOM.Renderer.Draw
                    , SOM.Renderer.Program

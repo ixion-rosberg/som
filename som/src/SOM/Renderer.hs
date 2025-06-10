@@ -2,15 +2,15 @@ module SOM.Renderer (Draw (..), ProgramList (..), Renderer, create, draw, loadAn
 
 import SOM.Prelude
 
-import SOM.Animation (Skin (..))
 import SOM.Binary.Animated qualified as Animated (Model (..))
 import SOM.Binary.Piece qualified as Piece (Model (..))
 import SOM.Game (Game (..))
-import SOM.Map (Piece (..), pieces)
-import SOM.Object (Object (..))
-import SOM.Player (Player (..))
+import SOM.Game.Animation (Skin (..))
+import SOM.Game.Map (Piece (..), pieces)
+import SOM.Game.Object (Object (..))
+import SOM.Game.Player (Player (..))
+import SOM.Game.Player.Head (Head (..))
 import SOM.Renderer.Draw (Draw (..))
-import SOM.Player.Head (Head (..))
 import SOM.Renderer.Program (Program, Source, enable)
 import SOM.Renderer.Program qualified as Program (create)
 import SOM.Renderer.Texture (Texture, bind)

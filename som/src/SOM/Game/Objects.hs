@@ -1,9 +1,9 @@
-module SOM.Objects (objects) where
+module SOM.Game.Objects (objects) where
 
 import SOM.Prelude
 
 import SOM.IdentityList (IdentityList, fromList)
-import SOM.Object (Input (..), Object)
+import SOM.Game.Object (Input (..), Object)
 
 import Control.Arrow (arr)
 

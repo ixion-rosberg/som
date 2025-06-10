@@ -1,15 +1,15 @@
-module SOM.Player (Player (..), player) where
+module SOM.Game.Player (Player (..), player) where
 
 import SOM.Prelude
 
-import SOM.Collision (BoundingSphere (..), Collision (..), (╳))
 import SOM.Controller (Button (..), Controller (..), Dpad (..))
 import SOM.Direction (Direction (..), pattern UP)
-import SOM.Map (Map, collisionShapes)
-import SOM.Player.Head (Head, head)
-import SOM.Player.Head qualified as Head (Input (..))
-import SOM.Player.Movement (acceleration, movement)
-import SOM.Player.Power (power)
+import SOM.Game.Collision (BoundingSphere (..), Collision (..), (╳))
+import SOM.Game.Map (Map, collisionShapes)
+import SOM.Game.Player.Head (Head, head)
+import SOM.Game.Player.Head qualified as Head (Input (..))
+import SOM.Game.Player.Movement (acceleration, movement)
+import SOM.Game.Player.Power (power)
 
 import Control.Arrow (returnA)
 

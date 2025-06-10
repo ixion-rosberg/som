@@ -1,4 +1,4 @@
-module SOM.Map
+module SOM.Game.Map
   ( Map
   , Orientation (..)
   , Piece (..)

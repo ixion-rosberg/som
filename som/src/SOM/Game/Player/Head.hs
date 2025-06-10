@@ -1,11 +1,11 @@
-module SOM.Player.Head where
+module SOM.Game.Player.Head where
 
 import SOM.Prelude
 
-import SOM.Collision (Ray (..))
 import SOM.Controller (Button (..), Controller (..))
 import SOM.Direction (Direction (..), pattern D3, pattern FORWARD, pattern RIGHT, pattern UP)
-import SOM.Player.Movement (Movement (..), Speed (..))
+import SOM.Game.Collision (Ray (..))
+import SOM.Game.Player.Movement (Movement (..), Speed (..))
 import SOM.Transform (transform)
 
 import Control.Arrow (returnA)

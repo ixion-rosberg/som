@@ -1,4 +1,4 @@
-module SOM.Player.Movement (Movement (..), Speed (..), acceleration, movement) where
+module SOM.Game.Player.Movement (Movement (..), Speed (..), acceleration, movement) where
 
 import SOM.Prelude
 

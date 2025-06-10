@@ -1,8 +1,8 @@
-module SOM.Player.Power (pmax, power) where
+module SOM.Game.Player.Power (pmax, power) where
 
 import SOM.Prelude
 
-import SOM.Player.Movement (Movement (..), Speed (..))
+import SOM.Game.Player.Movement (Movement (..), Speed (..))
 
 import Control.Arrow (arr, returnA, (&&&))
 
