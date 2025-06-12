@@ -1,0 +1,11 @@
+* Sword of Moonλight
+Early work-in-progress of an engine for /King's Field/-style games using the FRP library /Yampa/. The repository contains the engine itself as well as various development tools inspired by the game maker /Sword of Moonlight: King's Field Making Tool/.
+
+** Requirements
+GHC 9.10 and Cabal 3.14 are needed in order to build the project.
+
+** Demo
+A small test environment can be launched by executing ~cabal run som~.
+
+** References
+- Antony Courtney, Henrik Nilsson, John Peterson: /The Yampa Arcade./ [[https://www.antonycourtney.com/pubs/hw03.pdf]]

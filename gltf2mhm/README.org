@@ -1,0 +1,2 @@
+* gltf2mhm
+A command-line tool used to create collision meshes for map pieces from glTF files.

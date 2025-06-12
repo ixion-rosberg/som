@@ -1,0 +1,2 @@
+* gltf2msm
+A command-line tool used to create models for map pieces from glTF files.
