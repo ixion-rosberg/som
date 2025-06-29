@@ -11,7 +11,7 @@ import SOM.Binary.Animated
   , Vertex (..)
   )
 import SOM.Binary.Bounds (Bounds (..))
-import SOM.CLI (Options (..), handlers, outputOrExtension, parser)
+import SOM.CLI (Options (..), fromEither, outputOrExtension, parseOptions, runCLI)
 import SOM.GlTF
   ( Accessor (..)
   , AnimationSampler (..)
@@ -22,17 +22,16 @@ import SOM.GlTF
   , Mesh (..)
   , Skin (..)
   , access
+  , accessMaybe
+  , fromFile
   , loadBuffers
-  , parse
   )
 import SOM.GlTF qualified as G (Animation (..))
-
-import Codec.GlTF (fromFile)
 
 import Data.Binary (Binary, encodeFile)
 import Data.Binary.Extra (IEEE (..), UnsignedShort (..))
 import Data.Coerce (coerce)
-import Data.Either.Extra (mapLeft, maybeToEither)
+import Data.Either.Extra (maybeToEither)
 import Data.List (zipWith5)
 import Data.List.NonEmpty (NonEmpty, nonEmpty)
 import Data.Vector (toList, (!?))
@@ -42,45 +41,33 @@ import Linear.Quaternion (Quaternion (..))
 import Linear.V3 (V3 (..))
 import Linear.V4 (V4 (..))
 
-import Options.Applicative (execParser, fullDesc, info)
-
-import UnliftIO.Exception
-  ( catches
-  , fromEither
-  , stringException
-  )
-
 main ∷ IO ()
-main = (flip catches) handlers do
-  o ← execParser (info parser fullDesc)
-  g ← (lift ∘ parse ↢ lift ↢ fromFile) o.input
-  b ← loadBuffers g
+main = runCLI do
+  o ← parseOptions
 
-  m ← lift $ model b g
+  g ← (fromEither ↢ fromFile) o.input
+  b ← loadBuffers g
+  m ← fromEither (model b g)
 
   encodeFile (outputOrExtension "mdl" o) m
 
   where
-    lift = fromEither ∘ mapLeft stringException
-
     model b g = Model
-      <$> vertices b g.mesh
-      <*> indices b g.mesh
-      <*> joints b g
-      <*> pure (bounds g.mesh)
-      <*> pure (g.image.name <> ".txr")
+      <$> vertices  b g.mesh
+      <*> indices   b g.mesh
+      <*> joints    b g
+      <#> bounds      g.mesh.position
+      <#> texture     g.image
       <*> animation b g
 
     vertices b m = zipWith5 vertex
-      <$> access b m.position.bufferView
-      <*> access b m.normal
-      <*> access b m.texCoord
-      <*> accessMaybe b "Missing joints" m.joints
-      <*> accessMaybe b "Missing weights" m.weights
+      <$> access                        b m.position.bufferView
+      <*> access                        b m.normal
+      <*> access                        b m.texCoord
+      <*> accessMaybe "Missing joints"  b m.joints
+      <*> accessMaybe "Missing weights" b m.weights
 
     vertex p n t j w = Vertex (coerce p) (coerce n) (coerce t) (fmap fromIntegral j) (coerce w)
-
-    accessMaybe b m = access b ↢ maybeToEither m
 
     indices b m = coerce <$> access b m.indices
 
@@ -89,9 +76,11 @@ main = (flip catches) handlers do
 
       zipWith joint (toList s.joints) <$> access b s.inverseBindMatrices
 
-    joint t m = Joint t (coerce ∘ M.transpose $ m)
+    joint t = Joint t ∘ coerce ∘ M.transpose
 
-    bounds m = Bounds (coerce m.position.min) (coerce m.position.max)
+    bounds p = Bounds (coerce p.min) (coerce p.max)
+
+    texture i = i.name <> ".txr"
 
     animation b g = Animation
       <$> (transformations b =≪ maybeToEither "Missing animation" (g.animations !? 0))
