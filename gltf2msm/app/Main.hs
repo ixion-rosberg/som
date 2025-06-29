@@ -3,41 +3,35 @@ module Main where
 import SOM.Prelude
 
 import SOM.Binary.Piece (Model (..), Vertex (..))
-import SOM.GlTF (Accessor (..), GlTF (..), Image (..), Mesh (..), access, loadBuffers, parse)
-import SOM.CLI (Options (..), handlers, outputOrExtension, parser)
-
-import Codec.GlTF (fromFile)
+import SOM.GlTF (Accessor (..), GlTF (..), Image (..), Mesh (..), access, fromFile, loadBuffers)
+import SOM.CLI (Options (..), fromEither, outputOrExtension, parseOptions, runCLI)
 
 import Data.Binary (encodeFile)
 import Data.Binary.Extra (IEEE (..), UnsignedShort (..))
-import Data.Either.Extra (mapLeft)
-
-import Options.Applicative (execParser, fullDesc, info)
-
-import UnliftIO.Exception
-  ( catches
-  , fromEither
-  , stringException
-  )
+import Data.Coerce (coerce)
 
 main ∷ IO ()
-main = (flip catches) handlers do
-  o ← execParser $ info parser fullDesc
+main = runCLI do
+  o ← parseOptions
 
-  g ← (lift ∘ parse ↢ lift ↢ fromFile) o.input
-
+  g ← (fromEither ↢ fromFile) o.input
   b ← loadBuffers g
+  m ← fromEither (model b g)
 
-  ps ← lift $ access b g.mesh.position.bufferView
-  ns ← lift $ access b g.mesh.normal
-  ts ← lift $ access b g.mesh.texCoord
-  is ← lift $ access b g.mesh.indices
-
-  let vs  = zipWith3 vertex ps ns ts
-      is' = (.unUnsignedShort) <$> is
-      t   = g.image.name <> ".txr"
-
-  encodeFile (outputOrExtension "msm" o) (Model vs is' t)
+  encodeFile (outputOrExtension "msm" o) m
   where
-    lift = fromEither ∘ mapLeft stringException
-    vertex p n t = Vertex ((.unIEEE) <$> p) ((.unIEEE) <$> n) ((.unIEEE) <$> t)
+    model b g = Model
+      <$> vertices b g.mesh
+      <*> indices  b g.mesh
+      <#> texture    g.image
+
+    vertices b m = zipWith3 vertex
+      <$> access b m.position.bufferView
+      <*> access b m.normal
+      <*> access b m.texCoord
+
+    vertex p n t = Vertex (coerce p) (coerce n) (coerce t)
+
+    indices b m = coerce <$> access b m.indices
+
+    texture i = i.name <> ".txr"
