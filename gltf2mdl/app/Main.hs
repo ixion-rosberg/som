@@ -4,13 +4,13 @@ import SOM.Prelude
 
 import SOM.Binary.Animated
   ( Animation (..)
-  , Bounds (..)
   , Joint (..)
   , Keyframe (..)
   , Model (..)
   , Transformation (..)
   , Vertex (..)
   )
+import SOM.Binary.Bounds (Bounds (..))
 import SOM.CLI (Options (..), handlers, outputOrExtension, parser)
 import SOM.GlTF
   ( Accessor (..)
