@@ -4,6 +4,7 @@ module SOM.Prelude
   , (^≪)
   , (≫^)
   , (≪^)
+  , (<#>)
   ) where
 
 import Prelude as E hiding
@@ -48,3 +49,8 @@ infixr 1 ≫^
 (≪^) = (<<^)
 
 infixr 1 ≪^
+
+(<#>) ∷ Functor φ ⇒ φ (α → β) → α → φ β
+f <#> x = ($ x) <$> f
+
+infixl 4 <#>
