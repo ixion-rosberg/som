@@ -29,6 +29,7 @@ library
                       , binary
                       , bytestring
                       , derive-storable
+                      , extra
                       , filepath
                       , linear
                       , optparse-applicative
