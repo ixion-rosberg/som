@@ -10,6 +10,7 @@ module SOM.GlTF
   , Mesh (..)
   , Skin (..)
   , access
+  , accessMaybe
   , fromFile
   , loadBuffers
   , parse
@@ -188,6 +189,9 @@ access bs v = (maybeToEither "Data not found" ∘ fmap decode) buffer
   where
     buffer = bs !? v.buffer
     decode = decodeMany ∘ fromStrict ∘ B.take v.length ∘ B.drop v.offset
+
+accessMaybe ∷ Binary α ⇒ String → Buffers → Maybe (BufferView α) → Either String [α]
+accessMaybe e b = access b ↢ maybeToEither e
 
 fromFile ∷ FilePath → IO (Either String GlTF)
 fromFile = fmap (parse =≪) ∘ Unparsed.fromFile
