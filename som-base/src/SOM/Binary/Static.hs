@@ -7,6 +7,8 @@ import SOM.Binary.Bounds (Bounds)
 import Data.Binary (Binary)
 import Data.Word (Word16)
 
+import Foreign.Storable.Generic (GStorable)
+
 import GHC.Generics (Generic)
 
 import Linear.V2 (V2)
@@ -26,3 +28,4 @@ data Vertex = Vertex { position ∷ V3 Float
                      } deriving Generic
 
 instance Binary Vertex
+instance GStorable Vertex
