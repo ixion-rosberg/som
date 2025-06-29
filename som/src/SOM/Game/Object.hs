@@ -1,4 +1,4 @@
-module SOM.Game.Object (Input (..), Object (..), chest, potion) where
+module SOM.Game.Object (Input (..), Model (..), Object (..), chest, potion) where
 
 import SOM.Prelude
 
@@ -20,21 +20,23 @@ import Linear.V3 (V3)
 
 data Input = Input { player ∷ Player }
 
-data Object = Object { draw ∷ Draw }
+data Object = Object { position ∷ V3 Float, model ∷ Model }
 
-chest ∷ Bounds → Skin → Animation → (M44 Float → Skin → Draw) → V3 Float → SF Input Object
+data Model = Model { transparent ∷ Bool, draw ∷ Draw }
+
+chest ∷ Bounds → Skin → Animation → (M44 Float → Skin → Model) → V3 Float → SF Input Object
 chest b s a d p = proc i → do
 
   let ev = gate i.player.interact (interactable i.player)
 
   s' ← switch idle (const (animate a s)) ⤙ ev
 
-  returnA ⤙ Object (d t s')
+  returnA ⤙ Object p (d t s')
   where t = mkTransformationMat identity p
         idle = arr (const s) &&& arr id
         interactable pl = abs (distance pl.position p) < 2 ∧ (pl.head.lineOfSight ╳ bb)
         bb = BoundingBox (p + b.min) (p + b.max)
 
-potion ∷ Bounds → (M44 Float → Draw) → V3 Float → SF Input Object
-potion _ d p = (arr ∘ const ∘ Object ∘ d) t
+potion ∷ (M44 Float → Model) → V3 Float → SF Input Object
+potion d p = (arr ∘ const ∘ Object p ∘ d) t
   where t = mkTransformationMat identity p

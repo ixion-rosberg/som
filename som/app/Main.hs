@@ -120,8 +120,9 @@ main = do
 
           pure [ c (V3 6 0.01 -6)
                , p (V3 5 0.01 -5)
+               , p (V3 5.1 0.01 -5)
+               , p (V3 4.9 0.01 -5)
                ]
-
 
         loadChest r f = do
           m ← decodeFile (binDir <> f)
@@ -135,7 +136,7 @@ main = do
           t ← Texture.load (binDir <> m.texture)
           d ← loadStatic r m t
 
-          pure $ potion m.bounds d
+          pure $ potion d
 
         skin m = Skin ((.transformation) <$> m.joints) ((.inverseBindMatrix) <$> m.joints)
 

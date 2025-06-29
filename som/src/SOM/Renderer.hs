@@ -9,22 +9,35 @@ import SOM.Game (Game (..))
 import SOM.Game.Animation (Skin (..))
 import SOM.Game.Map (Piece (..), pieces)
 import SOM.Game.Object (Object (..))
+import SOM.Game.Object qualified as Object (Model (..))
 import SOM.Game.Player (Player (..))
 import SOM.Game.Player.Head (Head (..))
 import SOM.Renderer.Draw (Draw (..))
 import SOM.Renderer.Program (Program, Source, enable)
 import SOM.Renderer.Program qualified as Program (create)
-import SOM.Renderer.Texture (Texture, bind)
+import SOM.Renderer.Texture (Texture (..), bind)
 import SOM.Renderer.Uniform (setUniform)
 import SOM.Renderer.VAO (format)
 import SOM.Renderer.VAO qualified as VAO (create, draw)
-import SOM.Viewport (Viewport, clear, disableDepthTest, enableDepthTest, orthographic, perspective)
+import SOM.Viewport ( Viewport
+                    , clear
+                    , disableDepthMask
+                    , disableDepthTest
+                    , enableDepthMask
+                    , enableDepthTest
+                    , orthographic
+                    , perspective
+                    )
+
+import Data.Foldable (toList)
+import Data.List (partition, sortOn)
 
 import Graphics.GL (GLfloat, GLushort)
 
 import Linear.Matrix (M44)
+import Linear.Metric (distance)
 import Linear.V2 (V2 (..))
-import Linear.V3 (V3)
+import Linear.V3 (V3 (..))
 import Linear.V4 (V4 (..))
 
 import UnliftIO (MonadUnliftIO)
@@ -48,25 +61,38 @@ draw v r g = do
   enable r.programs.piece
   setUniform r.programs.piece "view" g.player.head.view
   setUniform r.programs.piece "projection" (perspective v)
-  drawMap g.map
+
+  enable r.programs.static
+  setUniform r.programs.static "view" g.player.head.view
+  setUniform r.programs.static "projection" (perspective v)
 
   enable r.programs.animated
   setUniform r.programs.animated "view" g.player.head.view
   setUniform r.programs.animated "projection" (perspective v)
-  drawObjects g.objects
-
-  disableDepthTest v
 
   enable r.programs.gauge
   setUniform r.programs.gauge "projection" (orthographic v)
+
+  drawMap g.map
+
+  drawObjects g.player g.objects
+
+  disableDepthTest v
+
   drawGauge g.powerGauge
 
   where
     drawMap = mapM_ drawPiece ∘ pieces
     drawPiece = (\ (Draw d) → d) ∘ (.draw)
 
-    drawObjects = mapM_ drawObject
-    drawObject = (\ (Draw d) → d) ∘ (.draw)
+    drawObjects p xs = mapM_ drawObject os
+      *> disableDepthMask v
+      *> mapM_ drawObject (sortByDistance ts)
+      *> enableDepthMask v
+      where (ts, os) = (partition (.model.transparent) ∘ toList) xs
+            sortByDistance = reverse ∘ sortOn (\ o → distance p.position o.position)
+
+    drawObject = (\ (Draw d) → d) ∘ (.model.draw)
 
     drawGauge = (\ (Draw d) → d)
 
@@ -77,37 +103,43 @@ loadPiece r m t = do
   v ← VAO.create fs m.vertices m.indices
 
   pure \ tr → Draw do
+    enable p
     bind t
     setUniform p "model" tr
     VAO.draw v
 
   where p  = r.programs.piece
-        fs = [ format (V3 GLfloat), format (V3 GLfloat), format (type (V2 GLfloat)) ]
+        fs = [ format (type (V3 GLfloat))
+             , format (type (V3 GLfloat))
+             , format (type (V2 GLfloat))
+             ]
 
-loadStatic ∷ MonadUnliftIO μ ⇒ Renderer → Static.Model → Texture → μ (M44 Float → Draw)
+loadStatic ∷ MonadUnliftIO μ ⇒ Renderer → Static.Model → Texture → μ (M44 Float → Object.Model)
 loadStatic r m t = do
   enable p
 
   v ← VAO.create fs m.vertices m.indices
 
-  pure \ tr → Draw do
+  pure \ tr → Object.Model t.transparent $ Draw do
+    enable p
     bind t
     setUniform p "model" tr
     VAO.draw v
 
     where p  = r.programs.static
-          fs = [ format (V3 GLfloat)
-               , format (V3 GLfloat)
+          fs = [ format (type (V3 GLfloat))
+               , format (type (V3 GLfloat))
                , format (type (V2 GLfloat))
                ]
 
-loadAnimated ∷ MonadUnliftIO μ ⇒ Renderer → Animated.Model → Texture → μ (M44 Float → Skin → Draw)
+loadAnimated ∷ MonadUnliftIO μ ⇒ Renderer → Animated.Model → Texture → μ (M44 Float → Skin → Object.Model)
 loadAnimated r m t = do
   enable p
 
   v ← VAO.create fs m.vertices m.indices
 
-  pure \ tr s → Draw do
+  pure \ tr s → Object.Model t.transparent $ Draw do
+    enable p
     bind t
     setUniform p "model" tr
     setUniform p "joint_transformations" s.transformations
@@ -115,8 +147,8 @@ loadAnimated r m t = do
     VAO.draw v
 
   where p  = r.programs.animated
-        fs = [ format (V3 GLfloat)
-             , format (V3 GLfloat)
+        fs = [ format (type (V3 GLfloat))
+             , format (type (V3 GLfloat))
              , format (type (V2 GLfloat))
              , format (type (V4 GLushort))
              , format (type (V4 GLfloat))
@@ -129,6 +161,7 @@ loadGauge r t (V2 x y) (V2 w h) = do
   v ← VAO.create fs vs is
 
   pure \ val → Draw do
+    enable p
     bind t
     setUniform p "max" (x + (val × w))
     VAO.draw v

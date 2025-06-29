@@ -1,4 +1,4 @@
-module SOM.Renderer.Texture (Texture, bind, load) where
+module SOM.Renderer.Texture (Texture (..), bind, load) where
 
 import SOM.Prelude
 
@@ -34,23 +34,23 @@ import Graphics.GL
 import UnliftIO (MonadUnliftIO)
 import UnliftIO.Foreign (withArray)
 
-newtype Texture = Texture GLuint
+data Texture = Texture { id ∷ GLuint, transparent ∷ Bool }
 
 load ∷ MonadUnliftIO μ ⇒ FilePath → μ Texture
 load f = do
-  (B.Texture w h _ xs) ← decodeFile f
+  (B.Texture w h t xs) ← decodeFile f
 
-  t ← query $ glCreateTextures GL_TEXTURE_2D 1
+  i ← query $ glCreateTextures GL_TEXTURE_2D 1
 
-  mapM_ (uncurry (glTextureParameteri t)) parameters
+  mapM_ (uncurry (glTextureParameteri i)) parameters
 
-  glTextureStorage2D t 1 GL_RGBA8 w h
+  glTextureStorage2D i 1 GL_RGBA8 w h
 
-  withArray xs $ glTextureSubImage2D t 0 0 0 w h GL_RGBA GL_UNSIGNED_BYTE ∘ castPtr
+  withArray xs $ glTextureSubImage2D i 0 0 0 w h GL_RGBA GL_UNSIGNED_BYTE ∘ castPtr
 
-  glGenerateTextureMipmap t
+  glGenerateTextureMipmap i
 
-  pure (Texture t)
+  pure (Texture i t)
 
   where parameters = [ (GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE)
                      , (GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE)
@@ -59,4 +59,4 @@ load f = do
                      ]
 
 bind ∷ MonadIO μ ⇒ Texture → μ ()
-bind (Texture t) = glBindTextureUnit 0 t
+bind t = glBindTextureUnit 0 t.id
