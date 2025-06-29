@@ -1,4 +1,4 @@
-module SOM.Game.Object (Input (..), Object (..), chest) where
+module SOM.Game.Object (Input (..), Object (..), chest, potion) where
 
 import SOM.Prelude
 
@@ -34,3 +34,7 @@ chest b s a d p = proc i → do
         idle = arr (const s) &&& arr id
         interactable pl = abs (distance pl.position p) < 2 ∧ (pl.head.lineOfSight ╳ bb)
         bb = BoundingBox (p + b.min) (p + b.max)
+
+potion ∷ Bounds → (M44 Float → Draw) → V3 Float → SF Input Object
+potion _ d p = (arr ∘ const ∘ Object ∘ d) t
+  where t = mkTransformationMat identity p

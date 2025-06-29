@@ -1,9 +1,10 @@
-module SOM.Renderer (Draw (..), ProgramList (..), Renderer, create, draw, loadAnimated, loadGauge, loadPiece) where
+module SOM.Renderer (Draw (..), ProgramList (..), Renderer, create, draw, loadAnimated, loadGauge, loadPiece, loadStatic) where
 
 import SOM.Prelude
 
 import SOM.Binary.Animated qualified as Animated (Model (..))
 import SOM.Binary.Piece qualified as Piece (Model (..))
+import SOM.Binary.Static qualified as Static (Model (..))
 import SOM.Game (Game (..))
 import SOM.Game.Animation (Skin (..))
 import SOM.Game.Map (Piece (..), pieces)
@@ -29,6 +30,7 @@ import Linear.V4 (V4 (..))
 import UnliftIO (MonadUnliftIO)
 
 data ProgramList α = ProgramList { piece    ∷ α
+                                 , static   ∷ α
                                  , animated ∷ α
                                  , gauge    ∷ α
                                  } deriving (Functor, Foldable, Traversable)
@@ -70,32 +72,50 @@ draw v r g = do
 
 loadPiece ∷ MonadUnliftIO μ ⇒ Renderer → Piece.Model → Texture → μ (M44 Float → Draw)
 loadPiece r m t = do
-  enable r.programs.piece
+  enable p
 
   v ← VAO.create fs m.vertices m.indices
 
   pure \ tr → Draw do
     bind t
-    setUniform r.programs.piece "model" tr
+    setUniform p "model" tr
     VAO.draw v
 
-  where fs = [ format (V3 GLfloat), format (V3 GLfloat), format (type (V2 GLfloat)) ]
+  where p  = r.programs.piece
+        fs = [ format (V3 GLfloat), format (V3 GLfloat), format (type (V2 GLfloat)) ]
+
+loadStatic ∷ MonadUnliftIO μ ⇒ Renderer → Static.Model → Texture → μ (M44 Float → Draw)
+loadStatic r m t = do
+  enable p
+
+  v ← VAO.create fs m.vertices m.indices
+
+  pure \ tr → Draw do
+    bind t
+    setUniform p "model" tr
+    VAO.draw v
+
+    where p  = r.programs.static
+          fs = [ format (V3 GLfloat)
+               , format (V3 GLfloat)
+               , format (type (V2 GLfloat))
+               ]
 
 loadAnimated ∷ MonadUnliftIO μ ⇒ Renderer → Animated.Model → Texture → μ (M44 Float → Skin → Draw)
 loadAnimated r m t = do
-  enable r.programs.animated
+  enable p
 
   v ← VAO.create fs m.vertices m.indices
 
   pure \ tr s → Draw do
     bind t
-    setUniform r.programs.animated "model" tr
-    setUniform r.programs.animated "joint_transformations" s.transformations
-    setUniform r.programs.animated "joint_ibms" s.inverseBindMatrices
-    setUniform r.programs.animated "model" tr
+    setUniform p "model" tr
+    setUniform p "joint_transformations" s.transformations
+    setUniform p "joint_ibms" s.inverseBindMatrices
     VAO.draw v
 
-  where fs = [ format (V3 GLfloat)
+  where p  = r.programs.animated
+        fs = [ format (V3 GLfloat)
              , format (V3 GLfloat)
              , format (type (V2 GLfloat))
              , format (type (V4 GLushort))
@@ -104,16 +124,17 @@ loadAnimated r m t = do
 
 loadGauge ∷ MonadUnliftIO μ ⇒ Renderer → Texture → V2 Float → V2 Float → μ (Float → Draw)
 loadGauge r t (V2 x y) (V2 w h) = do
-  enable r.programs.gauge
+  enable p
 
   v ← VAO.create fs vs is
 
   pure \ val → Draw do
     bind t
-    setUniform r.programs.gauge "max" (x + (val × w))
+    setUniform p "max" (x + (val × w))
     VAO.draw v
 
   where
+    p  = r.programs.gauge
     vs = [ tl, bl, br, tr ]
     is = [ 0, 1, 2, 2, 3, 0 ]
     tl = V4  x       y      0 0

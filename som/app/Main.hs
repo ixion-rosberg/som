@@ -4,13 +4,14 @@ import SOM.Prelude
 
 import SOM.Binary.Animated (Joint (..), Model (..))
 import SOM.Binary.Piece (Model (..))
+import SOM.Binary.Static (Model (..))
 import SOM.Controller (ButtonName (..), controller)
 import SOM.Game (Game, game)
 import SOM.Game.Animation (Skin (..))
 import SOM.Game.Map (Orientation (..), PieceSetup (..))
 import SOM.Game.Map qualified as Map (create)
-import SOM.Game.Object (chest)
-import SOM.Renderer (ProgramList (..), Renderer, draw, loadAnimated, loadGauge, loadPiece)
+import SOM.Game.Object (chest, potion)
+import SOM.Renderer (ProgramList (..), Renderer, draw, loadAnimated, loadGauge, loadPiece, loadStatic)
 import SOM.Renderer qualified as Renderer (create)
 import SOM.Renderer.Program (ShaderType (..))
 import SOM.Renderer.Texture qualified as Texture (load)
@@ -58,6 +59,9 @@ main = do
           [ (Vertex,   "som/shaders/piece.vert")
           , (Fragment, "som/shaders/piece.frag")
           ]
+          [ (Vertex,   "som/shaders/static.vert")
+          , (Fragment, "som/shaders/static.frag")
+          ]
           [ (Vertex,   "som/shaders/animated.vert")
           , (Fragment, "som/shaders/animated.frag")
           ]
@@ -101,7 +105,6 @@ main = do
                             , c 4 4 West
                             ]
 
-
         createPieceSetup r fm fc = do
           m ← decodeFile (binDir <> fm)
           c ← decodeFile (binDir <> fc)
@@ -113,8 +116,11 @@ main = do
 
         loadObjects r = do
           c ← loadChest r "chest.mdl"
+          p ← loadPotion r "potion.mdo"
 
-          pure [ c (V3 6 0.01 -6) ]
+          pure [ c (V3 6 0.01 -6)
+               , p (V3 5 0.01 -5)
+               ]
 
 
         loadChest r f = do
@@ -123,6 +129,13 @@ main = do
           d ← loadAnimated r m t
 
           pure $ chest m.bounds (skin m) m.animation d
+
+        loadPotion r f = do
+          m ← decodeFile (binDir <> f)
+          t ← Texture.load (binDir <> m.texture)
+          d ← loadStatic r m t
+
+          pure $ potion m.bounds d
 
         skin m = Skin ((.transformation) <$> m.joints) ((.inverseBindMatrix) <$> m.joints)
 
