@@ -10,6 +10,8 @@ module SOM.Binary.Animated
 
 import SOM.Prelude
 
+import SOM.Binary.Bounds (Bounds)
+
 import Data.Binary (Binary)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Word (Word16)
@@ -49,12 +51,6 @@ data Joint = Joint { transformation    ∷ M44 Float
                    } deriving Generic
 
 instance Binary Joint
-
-data Bounds = Bounds { min ∷ V3 Float
-                     , max ∷ V3 Float
-                     } deriving Generic
-
-instance Binary Bounds
 
 newtype Animation = Animation { transformations ∷ [Transformation] } deriving Generic
 

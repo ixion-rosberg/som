@@ -17,7 +17,9 @@ library
                       , UnicodeSyntax
     exposed-modules:    SOM.Prelude
                       , SOM.Binary.Animated
+                      , SOM.Binary.Bounds
                       , SOM.Binary.Piece
+                      , SOM.Binary.Static
                       , SOM.Binary.Texture
                       , SOM.CLI
                       , SOM.Direction
