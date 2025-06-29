@@ -3,48 +3,40 @@ module Main where
 import SOM.Prelude
 
 import SOM.Binary.Piece (CollisionShape (..), Face (..), Triangle (..))
-import SOM.CLI (Options (..), handlers, outputOrExtension, parser)
+import SOM.CLI (Options (..), fromEither, outputOrExtension, parseOptions, runCLI)
 import SOM.Direction (Direction (..))
-import SOM.GlTF (Accessor (..), GlTF (..), Mesh (..), access, loadBuffers, parse)
-
-import Codec.GlTF (fromFile)
+import SOM.GlTF (Accessor (..), GlTF (..), Mesh (..), access, fromFile, loadBuffers)
 
 import Data.Binary (encodeFile)
 import Data.Binary.Extra (IEEE (..), UnsignedShort (..))
-import Data.Either.Extra (mapLeft, maybeToEither)
+import Data.Coerce (coerce)
+import Data.Either.Extra (maybeToEither)
 import Data.List ((!?))
 
-import Options.Applicative (execParser, fullDesc, info)
-
-import UnliftIO.Exception
-  ( catches
-  , fromEither
-  , stringException
-  )
-
 main ∷ IO ()
-main = (flip catches) handlers do
-  o ← execParser $ info parser fullDesc
+main = runCLI do
+  o ← parseOptions
 
-  g ← (lift ∘ parse ↢ lift ↢ fromFile) o.input
-
+  g ← (fromEither ↢ fromFile) o.input
   b ← loadBuffers g
 
-  ps ← lift $ access b g.mesh.position.bufferView
-  ns ← lift $ access b g.mesh.normal
-  is ← lift $ access b g.mesh.indices
-
-  let ps' = (fmap ∘ fmap) (.unIEEE) ps
-      ns' = (Direction ∘ fmap (.unIEEE)) <$> ns
-      is' = (fromIntegral ∘ (.unUnsignedShort)) <$> is
-
-  c ← note $ CollisionShape <$> faces ps' ns' is'
+  c ← fromEither (collisionShape b g.mesh)
 
   encodeFile (outputOrExtension "mhm" o) c
 
   where
-    lift = fromEither ∘ mapLeft stringException
-    note = fromEither ∘ maybeToEither (stringException "Invalid collision shape")
+    collisionShape b m = do
+      ps ← access b m.position.bufferView
+      ns ← access b m.normal
+      is ← access b m.indices
+
+      fs ← note (faces (coerce ps) (coerce ns) (indices is))
+
+      pure (CollisionShape fs)
+
+    note = maybeToEither "Invalid collision shape"
+
+    indices = fmap (fromIntegral ∘ (.unUnsignedShort))
 
     faces _  _  []         = Just []
     faces ps ns (a:b:c:fs) = (:) <$> face ps ns a b c <*> faces ps ns fs
