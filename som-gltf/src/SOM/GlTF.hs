@@ -10,13 +10,14 @@ module SOM.GlTF
   , Mesh (..)
   , Skin (..)
   , access
+  , fromFile
   , loadBuffers
   , parse
   ) where
 
 import SOM.Prelude
 
-import Codec.GlTF qualified as Unparsed (GlTF (..))
+import Codec.GlTF qualified as Unparsed (GlTF (..), fromFile)
 import Codec.GlTF.Accessor qualified as Unparsed (Accessor (..), AccessorIx (..))
 import Codec.GlTF.Animation
   ( pattern ROTATION
@@ -187,3 +188,6 @@ access bs v = (maybeToEither "Data not found" ∘ fmap decode) buffer
   where
     buffer = bs !? v.buffer
     decode = decodeMany ∘ fromStrict ∘ B.take v.length ∘ B.drop v.offset
+
+fromFile ∷ FilePath → IO (Either String GlTF)
+fromFile = fmap (parse =≪) ∘ Unparsed.fromFile
