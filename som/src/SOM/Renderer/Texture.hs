@@ -38,7 +38,7 @@ newtype Texture = Texture GLuint
 
 load ∷ MonadUnliftIO μ ⇒ FilePath → μ Texture
 load f = do
-  (B.Texture w h xs) ← decodeFile f
+  (B.Texture w h _ xs) ← decodeFile f
 
   t ← query $ glCreateTextures GL_TEXTURE_2D 1
 

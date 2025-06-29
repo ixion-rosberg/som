@@ -2,7 +2,8 @@ module SOM.Game.Object (Input (..), Object (..), chest) where
 
 import SOM.Prelude
 
-import SOM.Binary.Animated (Animation, Bounds (..))
+import SOM.Binary.Animated (Animation)
+import SOM.Binary.Bounds (Bounds (..))
 import SOM.Game.Animation (Skin (..), animate)
 import SOM.Game.Collision (BoundingBox (..), (╳))
 import SOM.Game.Player (Player (..))
