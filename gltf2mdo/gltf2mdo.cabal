@@ -8,9 +8,13 @@ build-type:    Simple
 executable gltf2mdo
     ghc-options:        -Wall
     default-language:   GHC2024
-    default-extensions: NoImplicitPrelude
+    default-extensions: BlockArguments
+                      , NoImplicitPrelude
+                      , OverloadedRecordDot
                       , UnicodeSyntax
     build-depends:      base ^>=4.20.0.0
                       , som-base
+                      , som-gltf
+                      , binary
     main-is:            Main.hs
     hs-source-dirs:     app
