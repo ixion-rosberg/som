@@ -1,6 +1,5 @@
 module SOM.Binary.Animated
   ( Animation (..)
-  , Bounds (..)
   , Joint (..)
   , Keyframe (..)
   , Model (..)
