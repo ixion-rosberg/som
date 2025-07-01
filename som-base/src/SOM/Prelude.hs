@@ -10,9 +10,11 @@ module SOM.Prelude
 import Prelude as E hiding
   ( error
   , head
+  , id
   , init
   , last
   , lookup
+  , map
   , return
   , readFile
   , tail
