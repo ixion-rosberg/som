@@ -16,6 +16,7 @@ common shared
                       , NoImplicitPrelude
                       , OverloadedRecordDot
                       , PatternSynonyms
+                      , RecordWildCards
                       , RequiredTypeArguments
                       , StrictData
                       , TypeFamilies
@@ -44,7 +45,6 @@ library
                    , SOM.Game
                    , SOM.Game.Animation
                    , SOM.Game.Collision
-                   , SOM.Game.Gauge
                    , SOM.Game.Item
                    , SOM.Game.Map
                    , SOM.Game.Model
@@ -54,6 +54,8 @@ library
                    , SOM.Game.Player.Head
                    , SOM.Game.Player.Movement
                    , SOM.Game.Player.Power
+                   , SOM.Game.World
+                   , SOM.Gauge
                    , SOM.IdentityList
                    , SOM.Renderer
                    , SOM.Renderer.Program

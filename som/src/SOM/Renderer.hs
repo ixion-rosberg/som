@@ -6,13 +6,16 @@ import SOM.Binary.Animated qualified as Animated (Model (..))
 import SOM.Binary.Piece qualified as Piece (Model (..))
 import SOM.Binary.Static qualified as Static (Model (..))
 import SOM.Draw (Draw (..))
-import SOM.Game (Game (..))
+import SOM.Game (Game (..), InspectedItem (..))
 import SOM.Game.Animation (Skin (..))
 import SOM.Game.Map (Piece (..), pieces)
 import SOM.Game.Object (Object (..))
 import SOM.Game.Player (Player (..))
 import SOM.Game.Player.Head (Head (..))
+import SOM.Game.Player.Power (pmax)
 import SOM.Game.Model (Model (..))
+import SOM.Game.World (World (..))
+import SOM.Gauge (Gauge)
 import SOM.Renderer.Program (Program, Source, enable)
 import SOM.Renderer.Program qualified as Program (create)
 import SOM.Renderer.Texture (Texture (..), bind)
@@ -53,48 +56,62 @@ data Renderer = Renderer { programs ∷ ProgramList Program }
 create ∷ MonadUnliftIO μ ⇒ ProgramList [Source] → μ Renderer
 create = fmap Renderer ∘ mapM Program.create
 
-draw ∷ MonadUnliftIO μ ⇒ Viewport → Renderer → Game → μ ()
-draw v r g = do
-  clear v
-  enableDepthTest v
-
-  enable r.programs.piece
-  setUniform r.programs.piece "view" g.player.head.view
-  setUniform r.programs.piece "projection" (perspective v)
-
-  enable r.programs.static
-  setUniform r.programs.static "view" g.player.head.view
-  setUniform r.programs.static "projection" (perspective v)
-
-  enable r.programs.animated
-  setUniform r.programs.animated "view" g.player.head.view
-  setUniform r.programs.animated "projection" (perspective v)
-
-  enable r.programs.gauge
-  setUniform r.programs.gauge "projection" (orthographic v)
-
-  drawMap g.map
-
-  drawObjects g.player g.objects
-
-  disableDepthTest v
-
-  drawGauge g.powerGauge
+draw ∷ MonadUnliftIO μ ⇒ Viewport → Renderer → Gauge → Game → μ ()
+draw v r gauge g = clear v *> case g of
+  MainGame w         → drawWorld w *> drawHUD w
+  InspectingItem w i → drawWorld w *> drawItem i
 
   where
+    drawWorld w = do
+
+      enable r.programs.piece
+      setUniform r.programs.piece "view" w.player.head.view
+      setUniform r.programs.piece "projection" (perspective v)
+
+      enable r.programs.static
+      setUniform r.programs.static "view" w.player.head.view
+      setUniform r.programs.static "projection" (perspective v)
+
+      enable r.programs.animated
+      setUniform r.programs.animated "view" w.player.head.view
+      setUniform r.programs.animated "projection" (perspective v)
+
+      enable r.programs.gauge
+      setUniform r.programs.gauge "projection" (orthographic v)
+
+      drawMap w.map
+
+      drawObjects w.player w.objects
+
     drawMap = mapM_ drawPiece ∘ pieces
     drawPiece = (\ (Draw d) → d) ∘ (.draw)
 
-    drawObjects p xs = mapM_ drawObject os
-      *> disableDepthMask v
-      *> mapM_ drawObject (sortByDistance ts)
-      *> enableDepthMask v
-      where (ts, os) = (partition (.model.transparent) ∘ toList) xs
+    drawObjects p xs = do
+      mapM_ drawObject os
+      disableDepthMask v
+      mapM_ drawObject (sortByDistance ts)
+      enableDepthMask v
+      where (ts, os)       = (partition (.model.transparent) ∘ toList) xs
             sortByDistance = reverse ∘ sortOn (\ o → distance p.position o.position)
 
-    drawObject = (\ (Draw d) → d) ∘ (.model.draw)
+    drawObject = drawModel ∘ (.model)
 
-    drawGauge = (\ (Draw d) → d)
+    drawModel = (\ (Draw d) → d) ∘ (.draw)
+
+    drawHUD w = disableDepthTest v *> drawGauge w *> enableDepthTest v
+
+    drawGauge w = ((\ (Draw d) → d) ∘ gauge ∘ (÷ pmax)) w.player.power
+
+    drawItem i = do
+      disableDepthTest v
+
+      enable r.programs.static
+
+      setUniform r.programs.static "view" i.view
+
+      drawModel i.model
+
+      enableDepthTest v
 
 loadPiece ∷ MonadUnliftIO μ ⇒ Renderer → Piece.Model → Texture → μ (M44 Float → Draw)
 loadPiece r m t = do

@@ -1,20 +1,29 @@
-module SOM.Game.Objects (objects) where
+module SOM.Game.Objects (Inspect, Output (..), objects) where
 
 import SOM.Prelude
 
-import SOM.IdentityList (IdentityList, fromList, insert)
-import SOM.Game.Object (Input (..), Object, Output (..), Request (..))
+import SOM.IdentityList (IdentityList, assocs, fromList, insert)
+import SOM.Game.Item (Item)
+import SOM.Game.Object (Input (..), Object, ObjectSF, Request (..))
+import SOM.Game.Object qualified as Object (Output (..))
 
 import Control.Arrow (arr)
 
 import Data.Monoid (Endo (..))
 
-import FRP.Yampa (SF, dpSwitchB, notYet)
+import FRP.Yampa (Event (..), SF, dpSwitchB, mergeEvents, notYet)
 import FRP.Yampa.Extra (foldMapEvents)
 
-objects ∷ [SF Input Output] → SF Input (IdentityList Object)
-objects = (fmap (.object) ^≪) ∘ objects' ∘ fromList
-  where objects' os = dpSwitchB os (arr modify ⋙ notYet) (\ sfs f → objects' ((appEndo f) sfs))
+data Output = Output { objects ∷ IdentityList Object, inspect ∷ Event Inspect }
 
-        modify = foldMapEvents execute ∘ fmap (.request) ∘ snd
+type Inspect = (ℕ, Item)
+
+objects ∷ [ObjectSF] → SF Input Output
+objects = (output ^≪) ∘ objects' ∘ fromList
+  where objects' os       = dpSwitchB os (arr modify ⋙ notYet) continue
+        modify            = foldMapEvents execute ∘ fmap (.request) ∘ snd
         execute (Spawn o) = Endo (insert o)
+        continue sfs f    = objects' ((appEndo f) sfs)
+        output os         = Output ((.object) <$> os) (inspectFirst os)
+        inspectFirst      = mergeEvents ∘ fmap inspect ∘ assocs
+        inspect (i, o)    = (i, ) <$> o.inspect

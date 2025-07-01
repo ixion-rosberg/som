@@ -1,4 +1,4 @@
-module SOM.Game.Gauge (Gauge) where
+module SOM.Gauge (Gauge) where
 
 import SOM.Prelude
 

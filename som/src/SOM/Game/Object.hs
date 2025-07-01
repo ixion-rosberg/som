@@ -23,7 +23,7 @@ type ObjectSF = SF Input Output
 
 data Input = Input { player ∷ Player }
 
-data Output = Output { object ∷ Object, request ∷ Event Request }
+data Output = Output { object ∷ Object, request ∷ Event Request, inspect ∷ Event Item }
 
 data Object = Object { position ∷ V3 Float, model ∷ Model }
 
@@ -32,19 +32,22 @@ data Request = Spawn ObjectSF
 chest ∷ Bounds → Skin → Animation → (M44 Float → Skin → Model) → V3 Float → Item → ObjectSF
 chest b s a d p i = switch closed (const opening)
   where
-    closed = arr (const (Output (object s) NoEvent) &&& open)
+    closed = arr (const (Output (object s) NoEvent NoEvent) &&& open)
 
     opening = output ^≪ (animate a s &&& spawn)
       where spawn          = now (Spawn (looseItem i p))
-            output (s', r) = Output (object s') r
+            output (s', r) = Output (object s') r NoEvent
 
     object = Object p ∘ (d (mkTransformationMat identity p))
 
     open input = gate pl.interact interactable
       where pl           = input.player
-            interactable = abs (distance pl.position p) < 2 ∧ (pl.head.lineOfSight ╳ bb)
+            interactable = abs (distance pl.position p) < 1.5 ∧ (pl.head.lineOfSight ╳ bb)
             bb           = BoundingBox (p + b.min) (p + b.max)
 
 looseItem ∷ Item → V3 Float → ObjectSF
-looseItem i p = (arr ∘ const) (Output (Object p (i.model t)) NoEvent)
-  where t = mkTransformationMat identity p
+looseItem i p = arr (Output (Object p (i.model t)) NoEvent ∘ inspect)
+  where
+    t             = mkTransformationMat identity p
+    inspect input = gate (i <$ pl.interact) (distance pl.position p < 1.5)
+      where pl = input.player

@@ -1,31 +1,60 @@
-module SOM.Game (Game (..), game) where
+module SOM.Game (Game (..), InspectedItem (..), game) where
 
 import SOM.Prelude
 
-import SOM.Controller (Controller)
-import SOM.Draw (Draw)
-import SOM.Game.Gauge (Gauge)
+import SOM.Controller (Button (..), Controller (..))
 import SOM.Game.Map (Map)
-import SOM.Game.Object (Object, ObjectSF)
-import SOM.Game.Object qualified as Object (Input (..))
-import SOM.Game.Objects (objects)
-import SOM.Game.Player (Player (..), player)
-import SOM.Game.Player.Power (pmax)
-import SOM.IdentityList (IdentityList)
+import SOM.Game.Item (Item (..))
+import SOM.Game.Object (ObjectSF)
+import SOM.Game.World (World (..), world)
+import SOM.Game.World qualified as World (Output (..))
+import SOM.Game.Model (Model)
+import SOM.IdentityList (delete)
 
-import Control.Arrow (returnA)
+import Control.Arrow (arr, returnA)
 
-import FRP.Yampa (SF)
+import Data.Function ((&))
 
-import Linear.V3 (V3)
+import FRP.Yampa (Event (..), SF, integral, kSwitch)
 
-data Game = Game { player ∷ Player, map ∷ Map, objects ∷ IdentityList Object, powerGauge ∷ Draw }
+import Linear.Matrix (M44, mkTransformation)
+import Linear.Projection (lookAt)
+import Linear.V3 (V3 (..))
+import Linear.Quaternion (axisAngle)
 
-game ∷ Gauge → Map → [ObjectSF] → V3 Float → SF Controller Game
-game g m xs p₀ = proc c → do
+data Output = Output { game ∷ Game, transition ∷ Event Transition }
 
-  p ← player m p₀ ⤙ c
+data Game = MainGame World | InspectingItem World InspectedItem
 
-  os ← objects xs ⤙ Object.Input p
+data InspectedItem = InspectedItem { model ∷ Model, view ∷ M44 Float }
 
-  returnA ⤙ Game p m os (g (p.power ÷ pmax))
+data Transition = InspectItem World ℕ Item | Resume GameSF
+
+type GameSF = SF Controller Output
+
+game ∷ Map → [ObjectSF] → V3 Float → SF Controller Game
+game m os p₀ = (.game) ^≪ game' mainGame
+  where
+    game' s = kSwitch s (arr ((.transition) ∘ snd)) transition
+
+    mainGame = output ^≪ world m os p₀
+      where
+        output w = Output g i
+          where
+            g = MainGame w.world
+            i = (\ (id, it) → InspectItem w.world id it) <$> w.inspect
+
+    transition sf t = game' case t of
+      InspectItem w id it → inspectingItem sf w id it
+      Resume g            → g
+
+    inspectingItem sf w id it = proc c → do
+      θ ← integral ⤙ π ÷ 2
+
+      returnA ⤙ Output (InspectingItem w' (item θ)) ((Resume sf) <$ c.x.pressed)
+
+      where
+        w'     = w & (\ World {..} → World { objects = delete id w.objects, .. })
+        item θ = InspectedItem (it.model t) v
+          where t = mkTransformation (axisAngle (V3 0.0 1.0 0.0) θ) (V3 0.0 0.0 0.0)
+                v = lookAt (V3 0 1 1) (V3 0 0 0) (V3 0 1 0)

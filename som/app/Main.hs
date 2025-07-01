@@ -12,6 +12,7 @@ import SOM.Game.Item (Item (..))
 import SOM.Game.Map (Orientation (..), PieceSetup (..))
 import SOM.Game.Map qualified as Map (create)
 import SOM.Game.Object (chest)
+import SOM.Gauge (Gauge)
 import SOM.Renderer (ProgramList (..), Renderer, draw, loadAnimated, loadGauge, loadPiece, loadStatic)
 import SOM.Renderer qualified as Renderer (create)
 import SOM.Renderer.Program (ShaderType (..))
@@ -49,7 +50,7 @@ main = do
   m ← loadMap r
   os ← loadObjects r
 
-  reactimate (pure init) (sense w t) (actuate w v r) (controller ⋙ game g m os p₀)
+  reactimate (pure init) (sense w t) (actuate w v r g) (controller ⋙ game m os p₀)
 
   where width  = 800
         height = 600
@@ -155,8 +156,8 @@ sense w r _ = do
 
   pure (δt, Just i)
 
-actuate ∷ MonadUnliftIO μ ⇒ Window → Viewport → Renderer → Bool → Game → μ Bool
-actuate w v r _ g = draw v r g *> shouldClose w
+actuate ∷ MonadUnliftIO μ ⇒ Window → Viewport → Renderer → Gauge → Bool → Game → μ Bool
+actuate w v r gu _ gm = draw v r gu gm *> shouldClose w
 
 keyMap ∷ Map Key KeyState → ButtonName → Event Bool
 keyMap ks b = maybeToEvent $ find =≪ case b of
@@ -165,6 +166,7 @@ keyMap ks b = maybeToEvent $ find =≪ case b of
   DpadLeft  → Just Key'A
   DpadRight → Just Key'D
   Circle    → Just Key'Space
+  X         → Just Key'Tab
   L1        → Just Key'Left
   L2        → Just Key'Up
   R1        → Just Key'Right
