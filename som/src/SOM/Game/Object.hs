@@ -1,4 +1,4 @@
-module SOM.Game.Object (Input (..), Model (..), Object (..), chest, potion) where
+module SOM.Game.Object (Input (..), Object (..), ObjectSF, Output (..), Request (..), chest, looseItem) where
 
 import SOM.Prelude
 
@@ -6,37 +6,45 @@ import SOM.Binary.Animated (Animation)
 import SOM.Binary.Bounds (Bounds (..))
 import SOM.Game.Animation (Skin (..), animate)
 import SOM.Game.Collision (BoundingBox (..), (╳))
+import SOM.Game.Item (Item (..))
+import SOM.Game.Model (Model (..))
 import SOM.Game.Player (Player (..))
 import SOM.Game.Player.Head (Head (..))
-import SOM.Renderer.Draw (Draw)
 
-import Control.Arrow (arr, returnA, (&&&))
+import Control.Arrow (arr, (&&&))
 
-import FRP.Yampa (SF, gate, switch)
+import FRP.Yampa (Event (..), SF, gate, now, switch)
 
 import Linear.Matrix (M44, identity, mkTransformationMat)
 import Linear.Metric (distance)
 import Linear.V3 (V3)
 
+type ObjectSF = SF Input Output
+
 data Input = Input { player ∷ Player }
+
+data Output = Output { object ∷ Object, request ∷ Event Request }
 
 data Object = Object { position ∷ V3 Float, model ∷ Model }
 
-data Model = Model { transparent ∷ Bool, draw ∷ Draw }
+data Request = Spawn ObjectSF
 
-chest ∷ Bounds → Skin → Animation → (M44 Float → Skin → Model) → V3 Float → SF Input Object
-chest b s a d p = proc i → do
+chest ∷ Bounds → Skin → Animation → (M44 Float → Skin → Model) → V3 Float → Item → ObjectSF
+chest b s a d p i = switch closed (const opening)
+  where
+    closed = arr (const (Output (object s) NoEvent) &&& open)
 
-  let ev = gate i.player.interact (interactable i.player)
+    opening = output ^≪ (animate a s &&& spawn)
+      where spawn          = now (Spawn (looseItem i p))
+            output (s', r) = Output (object s') r
 
-  s' ← switch idle (const (animate a s)) ⤙ ev
+    object = Object p ∘ (d (mkTransformationMat identity p))
 
-  returnA ⤙ Object p (d t s')
-  where t = mkTransformationMat identity p
-        idle = arr (const s) &&& arr id
-        interactable pl = abs (distance pl.position p) < 2 ∧ (pl.head.lineOfSight ╳ bb)
-        bb = BoundingBox (p + b.min) (p + b.max)
+    open input = gate pl.interact interactable
+      where pl           = input.player
+            interactable = abs (distance pl.position p) < 2 ∧ (pl.head.lineOfSight ╳ bb)
+            bb           = BoundingBox (p + b.min) (p + b.max)
 
-potion ∷ (M44 Float → Model) → V3 Float → SF Input Object
-potion d p = (arr ∘ const ∘ Object p ∘ d) t
+looseItem ∷ Item → V3 Float → ObjectSF
+looseItem i p = (arr ∘ const) (Output (Object p (i.model t)) NoEvent)
   where t = mkTransformationMat identity p

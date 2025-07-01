@@ -2,6 +2,6 @@ module SOM.Game.Gauge (Gauge) where
 
 import SOM.Prelude
 
-import SOM.Renderer.Draw (Draw)
+import SOM.Draw (Draw)
 
 type Gauge = Float → Draw

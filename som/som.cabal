@@ -40,11 +40,14 @@ common shared
 library
     import:          shared
     exposed-modules: SOM.Controller
+                   , SOM.Draw
                    , SOM.Game
                    , SOM.Game.Animation
                    , SOM.Game.Collision
                    , SOM.Game.Gauge
+                   , SOM.Game.Item
                    , SOM.Game.Map
+                   , SOM.Game.Model
                    , SOM.Game.Object
                    , SOM.Game.Objects
                    , SOM.Game.Player
@@ -53,7 +56,6 @@ library
                    , SOM.Game.Player.Power
                    , SOM.IdentityList
                    , SOM.Renderer
-                   , SOM.Renderer.Draw
                    , SOM.Renderer.Program
                    , SOM.Renderer.Texture
                    , SOM.Renderer.Uniform

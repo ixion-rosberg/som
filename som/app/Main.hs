@@ -8,9 +8,10 @@ import SOM.Binary.Static (Model (..))
 import SOM.Controller (ButtonName (..), controller)
 import SOM.Game (Game, game)
 import SOM.Game.Animation (Skin (..))
+import SOM.Game.Item (Item (..))
 import SOM.Game.Map (Orientation (..), PieceSetup (..))
 import SOM.Game.Map qualified as Map (create)
-import SOM.Game.Object (chest, potion)
+import SOM.Game.Object (chest)
 import SOM.Renderer (ProgramList (..), Renderer, draw, loadAnimated, loadGauge, loadPiece, loadStatic)
 import SOM.Renderer qualified as Renderer (create)
 import SOM.Renderer.Program (ShaderType (..))
@@ -118,10 +119,7 @@ main = do
           c ← loadChest r "chest.mdl"
           p ← loadPotion r "potion.mdo"
 
-          pure [ c (V3 6 0.01 -6)
-               , p (V3 5 0.01 -5)
-               , p (V3 5.1 0.01 -5)
-               , p (V3 4.9 0.01 -5)
+          pure [ c (V3 6 0.01 -6) p
                ]
 
         loadChest r f = do
@@ -136,13 +134,11 @@ main = do
           t ← Texture.load (binDir <> m.texture)
           d ← loadStatic r m t
 
-          pure $ potion d
+          pure $ Item d
 
         skin m = Skin ((.transformation) <$> m.joints) ((.inverseBindMatrix) <$> m.joints)
 
         binDir = "som/bin/"
-
-
 
 sense ∷ MonadIO μ ⇒ Window → IORef UTCTime → Bool → μ (Double, Maybe (ButtonName → Event Bool))
 sense w r _ = do

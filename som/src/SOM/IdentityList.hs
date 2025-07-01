@@ -1,4 +1,4 @@
-module SOM.IdentityList (IdentityList, fromList, toList) where
+module SOM.IdentityList (IdentityList, fromList, insert, toList) where
 
 import SOM.Prelude
 

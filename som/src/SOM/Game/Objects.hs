@@ -2,13 +2,19 @@ module SOM.Game.Objects (objects) where
 
 import SOM.Prelude
 
-import SOM.IdentityList (IdentityList, fromList)
-import SOM.Game.Object (Input (..), Object)
+import SOM.IdentityList (IdentityList, fromList, insert)
+import SOM.Game.Object (Input (..), Object, Output (..), Request (..))
 
 import Control.Arrow (arr)
 
-import FRP.Yampa (Event (..), SF, dpSwitchB)
+import Data.Monoid (Endo (..))
 
-objects ∷ [SF Input Object] → SF Input (IdentityList Object)
-objects = objects' ∘ fromList
-  where objects' os = dpSwitchB os (arr $ const NoEvent) (\ sfs f → objects' (f sfs))
+import FRP.Yampa (SF, dpSwitchB, notYet)
+import FRP.Yampa.Extra (foldMapEvents)
+
+objects ∷ [SF Input Output] → SF Input (IdentityList Object)
+objects = (fmap (.object) ^≪) ∘ objects' ∘ fromList
+  where objects' os = dpSwitchB os (arr modify ⋙ notYet) (\ sfs f → objects' ((appEndo f) sfs))
+
+        modify = foldMapEvents execute ∘ fmap (.request) ∘ snd
+        execute (Spawn o) = Endo (insert o)

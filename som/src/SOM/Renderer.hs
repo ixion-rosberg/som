@@ -5,14 +5,14 @@ import SOM.Prelude
 import SOM.Binary.Animated qualified as Animated (Model (..))
 import SOM.Binary.Piece qualified as Piece (Model (..))
 import SOM.Binary.Static qualified as Static (Model (..))
+import SOM.Draw (Draw (..))
 import SOM.Game (Game (..))
 import SOM.Game.Animation (Skin (..))
 import SOM.Game.Map (Piece (..), pieces)
 import SOM.Game.Object (Object (..))
-import SOM.Game.Object qualified as Object (Model (..))
 import SOM.Game.Player (Player (..))
 import SOM.Game.Player.Head (Head (..))
-import SOM.Renderer.Draw (Draw (..))
+import SOM.Game.Model (Model (..))
 import SOM.Renderer.Program (Program, Source, enable)
 import SOM.Renderer.Program qualified as Program (create)
 import SOM.Renderer.Texture (Texture (..), bind)
@@ -114,13 +114,13 @@ loadPiece r m t = do
              , format (type (V2 GLfloat))
              ]
 
-loadStatic ∷ MonadUnliftIO μ ⇒ Renderer → Static.Model → Texture → μ (M44 Float → Object.Model)
+loadStatic ∷ MonadUnliftIO μ ⇒ Renderer → Static.Model → Texture → μ (M44 Float → Model)
 loadStatic r m t = do
   enable p
 
   v ← VAO.create fs m.vertices m.indices
 
-  pure \ tr → Object.Model t.transparent $ Draw do
+  pure \ tr → Model t.transparent $ Draw do
     enable p
     bind t
     setUniform p "model" tr
@@ -132,13 +132,13 @@ loadStatic r m t = do
                , format (type (V2 GLfloat))
                ]
 
-loadAnimated ∷ MonadUnliftIO μ ⇒ Renderer → Animated.Model → Texture → μ (M44 Float → Skin → Object.Model)
+loadAnimated ∷ MonadUnliftIO μ ⇒ Renderer → Animated.Model → Texture → μ (M44 Float → Skin → Model)
 loadAnimated r m t = do
   enable p
 
   v ← VAO.create fs m.vertices m.indices
 
-  pure \ tr s → Object.Model t.transparent $ Draw do
+  pure \ tr s → Model t.transparent $ Draw do
     enable p
     bind t
     setUniform p "model" tr

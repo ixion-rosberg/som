@@ -1,4 +1,4 @@
-module SOM.Renderer.Draw (Draw (..)) where
+module SOM.Draw (Draw (..)) where
 
 import UnliftIO (MonadUnliftIO)
 

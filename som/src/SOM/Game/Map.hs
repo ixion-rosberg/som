@@ -11,7 +11,7 @@ module SOM.Game.Map
 import SOM.Prelude
 
 import SOM.Binary.Piece (CollisionShape)
-import SOM.Renderer.Draw (Draw (..))
+import SOM.Draw (Draw (..))
 import SOM.Transform (transform)
 
 import Data.Map.Strict (elems, fromList)
