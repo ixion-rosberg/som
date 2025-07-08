@@ -1,4 +1,13 @@
-module SOM.Game.Object (Input (..), Object (..), ObjectSF, Output (..), Request (..), chest, looseItem) where
+module SOM.Game.Object
+  ( Input (..)
+  , InspectedItem (..)
+  , Object (..)
+  , ObjectSF
+  , Output (..)
+  , Request (..)
+  , chest
+  , looseItem
+  ) where
 
 import SOM.Prelude
 
@@ -21,9 +30,14 @@ import Linear.V3 (V3)
 
 type ObjectSF = SF Input Output
 
-data Input = Input { player ∷ Player }
+data Input = Input { player ∷ Player, interact ∷ Event () }
 
-data Output = Output { object ∷ Object, request ∷ Event Request, inspect ∷ Event Item }
+data Output = Output { object  ∷ Object
+                     , request ∷ Event Request
+                     , inspect ∷ Event InspectedItem
+                     }
+
+data InspectedItem = InspectedItem { item ∷ Item, position ∷ V3 Float }
 
 data Object = Object { position ∷ V3 Float, model ∷ Model }
 
@@ -40,7 +54,7 @@ chest b s a d p i = switch closed (const opening)
 
     object = Object p ∘ (d (mkTransformationMat identity p))
 
-    open input = gate pl.interact interactable
+    open input = gate input.interact interactable
       where pl           = input.player
             interactable = abs (distance pl.position p) < 1.5 ∧ (pl.head.lineOfSight ╳ bb)
             bb           = BoundingBox (p + b.min) (p + b.max)
@@ -49,5 +63,5 @@ looseItem ∷ Item → V3 Float → ObjectSF
 looseItem i p = arr (Output (Object p (i.model t)) NoEvent ∘ inspect)
   where
     t             = mkTransformationMat identity p
-    inspect input = gate (i <$ pl.interact) (distance pl.position p < 1.5)
-      where pl = input.player
+    inspect input = gate ev (distance input.player.position p < 1.5)
+      where ev = InspectedItem i p <$ input.interact

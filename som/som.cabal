@@ -52,6 +52,7 @@ library
                    , SOM.Game.Objects
                    , SOM.Game.Player
                    , SOM.Game.Player.Head
+                   , SOM.Game.Player.Inventory
                    , SOM.Game.Player.Movement
                    , SOM.Game.Player.Power
                    , SOM.Game.World

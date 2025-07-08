@@ -135,7 +135,7 @@ main = do
           t ← Texture.load (binDir <> m.texture)
           d ← loadStatic r m t
 
-          pure $ Item d
+          pure $ Item "Potion" d
 
         skin m = Skin ((.transformation) <$> m.joints) ((.inverseBindMatrix) <$> m.joints)
 

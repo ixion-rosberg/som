@@ -1,10 +1,11 @@
-module FRP.Yampa.Extra (appendEvents, clampedIntegral, concatEvents, foldMapEvents, integrateBy) where
+module FRP.Yampa.Extra (appendEvents, clampedIntegral, concatEvents, firstEvent, foldMapEvents, integrateBy) where
 
 import SOM.Prelude
 
+import Data.Foldable (toList)
 import Data.Ord (clamp)
 
-import FRP.Yampa (Event (..), SF, iterFrom, mergeBy)
+import FRP.Yampa (Event (..), SF, iterFrom, mergeBy, mergeEvents)
 
 integrateBy ∷ Fractional α ⇒ (α → β → β) → β → SF α β
 integrateBy f = iterFrom (\ x _ dt x₀ → f (realToFrac dt × x) x₀)
@@ -20,3 +21,6 @@ concatEvents = foldr appendEvents NoEvent
 
 foldMapEvents ∷ (Monoid β, Functor τ, Foldable τ) ⇒ (α → β) → τ (Event α) → Event β
 foldMapEvents f xs = concatEvents ((fmap ∘ fmap) f xs)
+
+firstEvent ∷ (Foldable τ) ⇒ (α → Event β) → τ α → Event β
+firstEvent f = mergeEvents ∘ fmap f ∘ toList

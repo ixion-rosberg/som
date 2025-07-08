@@ -1,30 +1,58 @@
-module SOM.Game.World (Output (..), World (..), world) where
+module SOM.Game.World (Input (..), ItemAction (..), Output (..), World (..), world) where
 
 import SOM.Prelude
 
 import SOM.Controller (Controller)
 import SOM.Game.Map (Map)
-import SOM.Game.Object (Object, ObjectSF)
+import SOM.Game.Object (InspectedItem (..), Object, ObjectSF)
 import SOM.Game.Object qualified as Object (Input (..))
 import SOM.Game.Objects (objects)
-import SOM.Game.Objects qualified as Objects (Inspect, Output (..))
+import SOM.Game.Objects qualified as Objects (Input (..), Output (..))
 import SOM.Game.Player (Player (..), player)
+import SOM.Game.Player qualified as Player (Input (..), Output (..))
 import SOM.IdentityList (IdentityList)
 
 import Control.Arrow (returnA)
 
-import FRP.Yampa (Event (..), SF)
+import FRP.Yampa (Event (..), SF, mapFilterE)
 
 import Linear.V3 (V3)
 
-data Output = Output { world ∷ World, inspect ∷ Event Objects.Inspect }
+data Input = Input { controller ∷ Controller
+                   , itemAction ∷ Event ItemAction
+                   }
 
-data World = World { player ∷ Player, map ∷ Map, objects ∷ IdentityList Object }
+data ItemAction = Return InspectedItem
+                | Collect InspectedItem
 
-world ∷ Map → [ObjectSF] → V3 Float → SF Controller Output
-world m xs p₀ = proc c → do
+data Output = Output { world   ∷ World
+                     , inspect ∷ Event InspectedItem
+                     }
 
-  p ← player m p₀ ⤙ c
-  o ← objects xs ⤙ Object.Input p
+data World = World { player  ∷ Player
+                   , map     ∷ Map
+                   , objects ∷ IdentityList Object
+                   }
 
-  returnA ⤙ Output (World p m o.objects) o.inspect
+world ∷ Map → [ObjectSF] → V3 Float → SF Input Output
+world m xs p₀ = proc i → do
+
+  p ← player m p₀ ⤙ playerInput i
+  o ← objects xs ⤙ objectsInput i p
+
+  returnA ⤙ Output (World p.player m o.objects) o.inspect
+
+  where
+    playerInput i = Player.Input i.controller (collectItem i.itemAction)
+
+    objectsInput i p = Objects.Input (objectInput p) (returnItem i.itemAction)
+
+    objectInput p = Object.Input p.player p.interact
+
+    returnItem = mapFilterE \ case
+      Return i → Just i
+      _        → Nothing
+
+    collectItem = mapFilterE \ case
+      Collect i → Just i.item
+      _         → Nothing

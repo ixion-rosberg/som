@@ -4,6 +4,7 @@ module SOM.Controller
   , Controller (..)
   , Dpad (..)
   , controller
+  , noInput
   ) where
 
 -- The Controller keeps track of any button press events in addition to the state of each button.
@@ -14,7 +15,7 @@ module SOM.Controller
 
 import SOM.Prelude
 
-import FRP.Yampa (Event, SF, edge, hold, returnA)
+import FRP.Yampa (Event (..), SF, edge, hold, returnA)
 
 data ButtonName = Start
                 | Select
@@ -76,3 +77,7 @@ button b = proc i → do
   h ← hold False ⤙ i b
   p ← edge ⤙ h
   returnA ⤙ Button h p
+
+noInput ∷ Controller
+noInput = Controller n n (Dpad n n n n) n n n n n n n n
+  where n = Button False NoEvent

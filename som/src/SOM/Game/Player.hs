@@ -1,13 +1,15 @@
-module SOM.Game.Player (Player (..), player) where
+module SOM.Game.Player (Input (..), Output (..), Player (..), player) where
 
 import SOM.Prelude
 
 import SOM.Controller (Button (..), Controller (..), Dpad (..))
-import SOM.Direction (Direction (..), pattern UP)
+import SOM.Direction (Direction (..))
 import SOM.Game.Collision (BoundingSphere (..), Collision (..), (╳))
+import SOM.Game.Item (Item)
 import SOM.Game.Map (Map, collisionShapes)
 import SOM.Game.Player.Head (Head, head)
 import SOM.Game.Player.Head qualified as Head (Input (..))
+import SOM.Game.Player.Inventory (Inventory, inventory)
 import SOM.Game.Player.Movement (acceleration, movement)
 import SOM.Game.Player.Power (power)
 
@@ -25,13 +27,27 @@ import Linear.Quaternion (axisAngle, rotate)
 import Linear.V3 (V3 (..))
 import Linear.Vector.Extra qualified as V (integral)
 
-data Player = Player { position ∷ V3 Float, head ∷ Head, power ∷ Float, interact ∷ Event () }
+data Input = Input { controller ∷ Controller
+                   , collect    ∷ Event Item
+                   }
 
-player ∷ Map → V3 Float → SF Controller Player
-player ma p₀ = proc c → do
-  let mo = movement c
+data Output = Output { player   ∷ Player
+                     , interact ∷ Event ()
+                     }
 
-  t ← axisAngle (UP).unDirection ^≪ integral ⤙ turn c
+data Player = Player { position  ∷ V3 Float
+                     , head      ∷ Head
+                     , power     ∷ Float
+                     , inventory ∷ Inventory
+                     }
+
+
+player ∷ Map → V3 Float → SF Input Output
+player ma p₀ = proc i → do
+  let c  = i.controller
+      mo = movement c
+
+  t ← axisAngle (V3 0 1 0) ^≪ integral ⤙ turn c
 
   rec
     v ← V.integral            ⤙ acceleration v mo
@@ -40,7 +56,9 @@ player ma p₀ = proc c → do
   h  ← head  ⤙ Head.Input c mo (mkTransformation t p)
   po ← power ⤙ mo
 
-  returnA ⤙ Player p h po c.circle.pressed
+  inv ← inventory ⤙ i.collect
+
+  returnA ⤙ Output (Player p h po inv) c.circle.pressed
 
   where
     turn c = getSum (turnLeft <> turnRight)
